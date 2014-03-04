@@ -1,6 +1,7 @@
 #ifndef COOL_LEXER_H_
 #define COOL_LEXERL_H_
 
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -11,6 +12,8 @@ private:
 	TokenType getNextType();
 	char popInput();
 	TokenType findKeyword(std::string);
+	void storeToken(const TokenType&, const std::string, const int&);
+	
 public:
 	bool verbose;
 	std::string filename;

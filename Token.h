@@ -26,6 +26,8 @@ struct TokenType {
 		OPEN_BRACE,
 		CLOSED_BRACE,
 		
+		PERIOD,
+		COMMA,
 		COLON,
 		SEMICOLON
 	} e;
@@ -53,6 +55,8 @@ struct TokenType {
 			case CLOSED_PAREN: return "CLOSED_PAREN";
 			case OPEN_BRACE: return "OPEN_BRACE";
 			case CLOSED_BRACE: return "CLOSED_BRACE";
+			case PERIOD: return "PERIOD";
+			case COMMA: return "COMMA";
 			case COLON: return "COLON";
 			case SEMICOLON: return "SEMICOLON";
 		}
@@ -63,12 +67,12 @@ struct TokenType {
 class Token {
 public:
 	TokenType type;
-	std::string value;
+	std::string lexeme;
 	int line;
-	Token(TokenType type = TokenType::ERROR, std::string value = "", int line = 0)
-			: type(type), value(value), line(line) {}
+	Token(TokenType type = TokenType::ERROR, std::string lexeme = "", int line = 0)
+			: type(type), lexeme(lexeme), line(line) {}
 	bool operator==(const Token &t) const {
-		return (type == t.type && value.compare(t.value) == 0);
+		return (type == t.type && lexeme.compare(t.lexeme) == 0);
 	}
 };
 

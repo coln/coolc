@@ -23,6 +23,8 @@ TokenType Lexer::getNextType(){
 	if(c == ')') return TokenType::CLOSED_PAREN;
 	if(c == '{') return TokenType::OPEN_BRACE;
 	if(c == '}') return TokenType::CLOSED_BRACE;
+	if(c == '.') return TokenType::PERIOD;
+	if(c == ',') return TokenType::COMMA;
 	if(c == ':') return TokenType::COLON;
 	if(c == ';') return TokenType::SEMICOLON;
 	return TokenType::ERROR;
@@ -38,6 +40,14 @@ char popInput(){
 // No keywords for now
 TokenType findKeyword(std::string lexeme){
 	return TokenType::INDENTIFER;
+}
+
+void storeToken(const TokenType &type, const std::string lexeme, const int &line){
+	tokens.push(Token(type, lexeme, line));
+	if(verbose){
+		std::cout << "Token: \"" << std::setw(8) << std::left <<  lexeme << "\" ";
+		std::cout << "Type: " << TokenType::toString(type) << std::endl;
+	}
 }
 
 bool analyze(){

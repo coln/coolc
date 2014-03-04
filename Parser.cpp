@@ -72,7 +72,7 @@ bool Parser::analyze(){
 		parseTree.push(stack.top());
 		next = tokenToSymbol(tokens[i]);
 		if(next == T_error){
-			std::cerr << "Parser: Error in parsing token \"" << token[i].value << "\" ";
+			std::cerr << "Parser: Error in parsing token \"" << token[i].lexeme << "\" ";
 			std::cerr << "on line " << token[i].line << std::endl;
 		}
 		action = actionAt(top->state, next);
@@ -95,7 +95,7 @@ bool Parser::analyze(){
 			}
 			return true;
 		}else if(action == ERROR){
-			std::cerr << "Parser: Error in parsing token \"" << token[i].value << "\" ";
+			std::cerr << "Parser: Error in parsing token \"" << token[i].lexeme << "\" ";
 			std::cerr << "on line " << token[i].line << std::endl;
 			std::cerr << "Invalid move." << std::endl;
 			return false;
