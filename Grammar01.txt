@@ -1,0 +1,54 @@
+Grammar
+=======
+S -> A
+A -> int + A | int
+
+First/Follow
+============
+First(S) = First(A)
+Follow(S) = { $ }
+First(A) = { int }
+Follow(A) = { $ }
+
+States
+======
+0. Start
+--------
+S -> .A   (accept)
+
+1. A
+-----
+S -> A.   (reduce 1 if next = $)
+A -> int + A.   (reduce 3 if next = Follow(A))
+
+2. +
+-----
+A -> int +. A   (shift if next = First(A))
+
+3. int
+------
+A -> int.   (reduce if next = Follow(A))
+A -> int. + A   (shift if next = "+")
+
+Action Table
+=============
+      | next
+state |  A         +        int       $
+------+--------------------------------------
+   0  |  shift 1   x        shift 1   accept
+   1  |  x         x        x         reduce 3->1  (reduce 1->0 if stack size == 1)
+   2  |  x         x        shift 1   x
+   3  |  x         shift 2  x         reduce 1->1
+
+Reduce Table
+=============
+// # = number of items to reduce
+// goto = state to go to after reduce
+// sym = symbol to replace after reduce
+      | next
+state |  $
+------+-------------
+   0  |  x
+   1  |  #=3, goto=1, sym=A  (#=1, goto=0, sym=S if stack size == 1)
+   2  |  x
+   3  |  #=1, goto=1, sym=A
