@@ -28,7 +28,9 @@ private:
 		REDUCE = -2,
 		// SHIFT > 0
 	}
-	std::stack<StackItem> stack;
+	typedef std::stack<StackItem> stack_t;
+	stack_t stack;
+	stack_t parseTree;
 	
 	typedef std::vector<StackItem> stackVector_t;
 	typedef std::vector<stackVector_t> reduceTable_t;
@@ -41,6 +43,7 @@ private:
 	int actionAt(const int&, const Symbol&);
 	ReduceItem reduceAt(const int&, const Symbol&);
 	Symbol& tokenToSymbol(const Token&);
+	void showParseTree();
 	
 public:
 	bool verbose;
