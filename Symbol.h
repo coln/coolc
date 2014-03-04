@@ -1,6 +1,8 @@
 #ifndef COOL_SYMBOL_H_
 #define COOL_SYMBOL_H_
 
+#include <string>
+
 class Symbol;
 class Terminal;
 class NonTerminal;
@@ -15,6 +17,9 @@ struct SymbolType {
 	opertor Enum() { return e; }
 	bool operator==(const SymbolType &s) const {
 		return (e == s.e);
+	}
+	bool operator<(const SymbolType &s) const {
+		return (e < s.e);
 	}
 	static const char* toString(const TokenType &t) {
 		switch(t.e){
@@ -36,6 +41,9 @@ public:
 		type = s.type;
 		value = s.value;
 		return *this;
+	}
+	bool operator<(const Symbol& s) const {
+		return (type < s.type && value.compare(s.value) < 0)
 	}
 	bool operator==(const Symbol& s) const {
 		return (type = s.type && value.compare(s.value) == 0);

@@ -1,82 +1,90 @@
 Grammar
 =======
 S -> A
-A -> (A) | int * A | int + A | int
+A -> B + A | B
+B -> int * B | int | (A)
 
 First/Follow
 ============
 First(S) = First(A)
+First(A) = First(B)
+First(B) = { int, ( }
 Follow(S) = { $ }
-First(A) = { (, int }
-Follow(A) = { ), $ }
-Follow("(") = First(A)
-Follow(")") = Follow(A)
-Follow("*") = First(A)
-Follow("+") = First(A)
-Follow(int) = { ), *, +, $ }
+Follow(A) = Follow(B)
+Follow(B) = { $, ), + }
+Follow("(") = { int, ( }
+Follow(")") = { $, ), + }
+Follow("*") = { int, ( }
+Follow("+") = { int, ( }
+Follow(int) = { *, $, ), + }
 
 States
 ======
-0. Start
----------
-S -> .A   (accept)
-
-1. A
------
-S -> A.   (reduce 1 if stack size == 1 and next = $)
-A -> (A.)
-A -> int * A.
-A -> int + A.
-
-2. (
------
-A -> (.A)
-
-3. )
------
-A -> (A).
-
-4. *
------
-A -> int *. A
-
-5. +
------
-A -> int +. A
-
-6. int
-------
-A -> int.
-A -> int. * A
-A -> int. + A
+[0] S -> .A
+    A -> .B + A
+    A -> .B
+    B -> .int * B
+    B -> .int
+    B -> .(A)
+[1] S -> A.
+[2] A -> B. + A
+    A -> B.
+ [3] A -> B +. A
+     A -> .B + A
+     A -> .B
+     B -> .int * B
+     B -> .int
+     B -> .(A)
+  [4] A -> B + A.
+[5] B -> int. * B
+    B -> int.
+ [6] B -> int *. B
+     B -> .int * B
+     B -> .int
+     B -> .(A)
+  [7] B -> int * B.
+[8] B -> (.A)
+    A -> .B + A
+    A -> .B
+    B -> .(A)
+    B -> .int * B
+    B -> .int
+ [9] B -> (A.)
+  [10] B -> (A).
 
 Action Table
 =============
       | next
-state |  (        )        *        +        int        $
-------+---------------------------------------------------------------
-   0  |  shift 2  x        x        x        shift 6    accept
-   1  |  x        shift 3  x        x        x          reduce
-   2  |  shift 2  x        x        x        shift 6    x
-   3  |  x        reduce   x        x        x          reduce
-   4  |  shift 2  x        x        x        shift 6    x
-   5  |  shift 2  x        x        x        shift 6    x
-   6  |  x        reduce   shift 4  shift 5  x          reduce
+state |  A        B        +        *        int      (        )        $        S
+------+--------------------------------------------------------------------------------
+   0  |  shift 1  shift 2  x        x        shift 5  shift 8  x        accept   accept
+   1  |  x        x        x        x        x        x        x        reduce   
+   2  |  x        x        shift 3  x        x        x        reduce   reduce
+   3  |  shift 4  shift 2  x        x        shift 5  shift 8  x        x        
+   4  |  x        x        reduce   x        x        x        reudce   reduce
+   5  |  x        x        reduce   shift 6  x        x        reduce   reduce
+   6  |  x        shift 7  x        x        shift 5  shift 8  x        x        
+   7  |  x        x        reduce   x        x        x        reduce   reduce
+   8  |  shift 9  shift 2  x        x        shift 5  shift 8  x        x        
+   9  |  x        x        x        x        x        x        shift 10 x        
+   10 |  x        x        reduce   x        x        x        reduce   reduce
 
 Reduce Table
 =============
-// Format: #/goto/sym
+// Format: #/sym
 // # = number of items to reduce
-// goto = state to go to after reduce
 // sym = symbol to replace after reduce
       | next
-state |  (     )      $
+state |  x (doesn't matter)
 ------+-------------------
    0  |  x
-   1  |  x     x      3/1/A  (1/1/S if stack size == 1)
-   2  |  x     x      x
-   3  |  x     3/1/A  x
-   4  |  x     x      x
-   5  |  x     x      x
-   6  |  x     3/1/A  3/1/A
-   
+   1  |  1/S   <-- special case
+   2  |  1/A
+   3  |  x
+   4  |  3/A
+   5  |  1/B
+   6  |  x
+   7  |  3/B
+   8  |  x
+   9  |  x
+   10 |  3/B

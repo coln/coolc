@@ -1,35 +1,78 @@
 #include "Parser.h"
 
 // Init tables
-int Parser::actionTable[4][4] = {
-	{ 1, X, 1, ACCEPT },
-	{ X, X, X, REDUCE },
-	{ X, X, 1, X },
-	{ X, 2, X, REDUCE }
-};
-
-Parser::Parser()
-		: verbose(false), showTree(false),
-		  NT_S("S"), NT_A("A"),
-		  T_plus("+"), T_int("int"), T_end("$"), T_error("error")
-{
-	if(reduceTable.size() > 0){
-		return;
+const action_t Parser::actionTable = Parser::initActionTable();
+const reduce_t Parser::reduceTable = Parser::initReduceTable();
+static action_t Parser::initActionTable(){
+	action_t table;
+	
+	// One way to do it
+	actionRow_t rows[numStates](5, T_error);
+	rows[0][NT_S] = ACCEPT;
+	rows[0][NT_A] = 1;
+	rows[0][T_int] = 2;
+	rows[0][T_end] = ACCEPT;
+	rows[1][T_end] = REDUCE;
+	rows[2][T_plus] = 3;
+	rows[2][T_end] = REDUCE;
+	rows[3][NT_A] = 4;
+	rows[3][T_int] = 2;
+	rows[4][T_end] = REDUCE;
+	int count = numStates;
+	while(--count >= 0){
+		table.push_back(rows[count]);
 	}
 	
-	int numRows;
-	stackVector_t rows[numRows];
-	rows[0].push_back(ReduceItem(0, 0, T_error));
-	rows[1].push_back(ReduceItem(3, 1, NT_A));
-	rows[2].push_back(ReduceItem(0, 0, T_error));
-	rows[3].push_back(ReduceItem(1, 1, NT_A));
-	reduceTable_t v(numRows);
-	v.push_back(rows[0]);
-	v.push_back(rows[1]);
-	v.push_back(rows[2]);
-	v.push_back(rows[3]);
-	reduceTable.assing(v.begin(), v.end());
+	table.clear();
+	
+	// Another way to do it
+	std::vector<Symbol> indices;
+	indices.push_back(NT_A);
+	indices.push_back(T_plus);
+	indices.push_back(T_int);
+	indices.push_back(T_end);
+	indices.push_back(NT_S);
+	
+	int numIndices = indices.size();
+	int actions[numStates][numIndices - 1] = {
+		{ 1, X, 2, ACCEPT },
+		{ X, X, X, REDUCE },
+		{ X, 3, X, REDUCE },
+		{ 4, X, 2, X },
+		{ X, X, X, REDUCE }
+	};
+	
+	int i, j;
+	actionRow_t row;
+	for(i = 0; i < numStates; i++){
+		for(j = 0; j < numIndices; j++){
+			if(j == numIndices - 1){
+				row[NT_S] = ACCEPT;
+				continue;
+			}
+			row[indices[j]] = actions[i][j];
+		}
+		table.push_back(row);
+	}
+	
+	return table;
 }
+static reduce_t Parser::initReduceTable(){
+	reduce_t table;
+	
+	int numIndices = 1;
+	reduceRow_t rows[numStates](1, ReduceItem(0, T_error));
+	rows[1] = ReduceItem(1, NT_S);
+	rows[2] = ReduceItem(1, NT_A);
+	rows[4] = ReduceItem(3, NT_A);
+	int count = numStates;
+	while(--count >= 0){
+		table.push_back(rows[count]);
+	}
+	return table;
+}
+
+
 Parser::~Parser(){
 	stack.clear();
 	tokens.clear();
@@ -40,6 +83,11 @@ Symbol& Parser::tokenToSymbol(const Token& token){
 	if(token.type == TokenType::INTEGER) return T_int;
 	if(token.type == TokenType::END) return T_end;
 	return T_error;
+}
+
+int actionAt(const int &state, const Symbol &next){
+	if(next == NT_S) return ACCEPT;
+	if
 }
 
 // Yea I don't think this is good for large stacks.
@@ -66,11 +114,11 @@ bool Parser::analyze(){
 	
 	// Init the stack
 	stack.push(StackItem(0, NT_S));
+	next = tokenToSymbol(tokens[i]);
 	
 	while(true){
 		top = &stack.top();
 		parseTree.push(stack.top());
-		next = tokenToSymbol(tokens[i]);
 		if(next == T_error){
 			std::cerr << "Parser: Error in parsing token \"" << token[i].lexeme << "\" ";
 			std::cerr << "on line " << token[i].line << std::endl;
@@ -99,20 +147,18 @@ bool Parser::analyze(){
 			std::cerr << "on line " << token[i].line << std::endl;
 			std::cerr << "Invalid move." << std::endl;
 			return false;
-		}else if(action == REDUCE && stack.size() == 1){
-			// The initial stack item accepts
-			stack.pop();
-			continue;
 		}else if(action == REDUCE){
 			ReduceItem reduce = reduceAt(top->state, next);
 			int count = reduce.numberOfReduces;
 			while(count-- > 0){
 				stack.pop();
 			}
-			stack.push(StackItem(reduce.goto, reduce.Symbol));
+			next = reduce.symbol;
+			i--;
 			continue;
 		}else if(action > 0){
 			stack.push(StackItem(action, next));
+			next = tokenToSymbol(tokens[i]);
 			i++;
 			continue;
 		}
