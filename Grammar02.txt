@@ -1,0 +1,82 @@
+Grammar
+=======
+S -> A
+A -> (A) | int * A | int + A | int
+
+First/Follow
+============
+First(S) = First(A)
+Follow(S) = { $ }
+First(A) = { (, int }
+Follow(A) = { ), $ }
+Follow("(") = First(A)
+Follow(")") = Follow(A)
+Follow("*") = First(A)
+Follow("+") = First(A)
+Follow(int) = { ), *, +, $ }
+
+States
+======
+0. Start
+---------
+S -> .A   (accept)
+
+1. A
+-----
+S -> A.   (reduce 1 if stack size == 1 and next = $)
+A -> (A.)
+A -> int * A.
+A -> int + A.
+
+2. (
+-----
+A -> (.A)
+
+3. )
+-----
+A -> (A).
+
+4. *
+-----
+A -> int *. A
+
+5. +
+-----
+A -> int +. A
+
+6. int
+------
+A -> int.
+A -> int. * A
+A -> int. + A
+
+Action Table
+=============
+      | next
+state |  (        )        *        +        int        $
+------+---------------------------------------------------------------
+   0  |  shift 2  x        x        x        shift 6    accept
+   1  |  x        shift 3  x        x        x          reduce
+   2  |  shift 2  x        x        x        shift 6    x
+   3  |  x        reduce   x        x        x          reduce
+   4  |  shift 2  x        x        x        shift 6    x
+   5  |  shift 2  x        x        x        shift 6    x
+   6  |  x        reduce   shift 4  shift 5  x          reduce
+
+Reduce Table
+=============
+// Format: #/goto/sym
+// # = number of items to reduce
+// goto = state to go to after reduce
+// sym = symbol to replace after reduce
+      | next
+state |  (     )      $
+------+-------------------
+   0  |  x
+   1  |  x     x      3/1/A  (1/1/S if stack size == 1)
+   2  |  x     x      x
+   3  |  x     3/1/A  x
+   4  |  x     x      x
+   5  |  x     x      x
+   6  |  x     3/1/A  3/1/A
+   
