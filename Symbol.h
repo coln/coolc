@@ -14,14 +14,14 @@ struct SymbolType {
 		NONTERMINAL
 	} e;
 	SymbolType(Enum e = SYMBOL) : e(e) {}
-	opertor Enum() { return e; }
+	operator Enum() { return e; }
 	bool operator==(const SymbolType &s) const {
 		return (e == s.e);
 	}
 	bool operator<(const SymbolType &s) const {
 		return (e < s.e);
 	}
-	static const char* toString(const TokenType &t) {
+	static const char* toString(const SymbolType &t) {
 		switch(t.e){
 			case SYMBOL: return "SYMBOL";
 			case TERMINAL: return "TERMINAL";
@@ -35,18 +35,18 @@ class Symbol {
 public:
 	SymbolType type;
 	std::string value;
-	Symbol(const SymbolType type = SymbolType::SYMBOL, const std::string value)
+	Symbol(const SymbolType type = SymbolType::SYMBOL, const std::string value = "")
 			: type(type), value(value) {}
 	Symbol& operator=(const Symbol& s){
 		type = s.type;
 		value = s.value;
 		return *this;
 	}
-	bool operator<(const Symbol& s) const {
-		return (type < s.type && value.compare(s.value) < 0)
-	}
 	bool operator==(const Symbol& s) const {
-		return (type = s.type && value.compare(s.value) == 0);
+		return (type == s.type && value.compare(s.value) == 0);
+	}
+	bool operator<(const Symbol& s) const {
+		return (type < s.type && value.compare(s.value) < 0);
 	}
 };
 

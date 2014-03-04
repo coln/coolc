@@ -33,9 +33,6 @@ struct TokenType {
 	} e;
 	TokenType(Enum e = ERROR) : e(e) {}
 	operator Enum() { return e; }
-	bool operator==(const TokenType &t) const {
-		return (e == t.e);
-	}
 	static const char* toString(const TokenType &t) {
 		switch(t.e){
 			case ERROR: return "ERROR";
@@ -72,7 +69,7 @@ public:
 	Token(TokenType type = TokenType::ERROR, std::string lexeme = "", int line = 0)
 			: type(type), lexeme(lexeme), line(line) {}
 	bool operator==(const Token &t) const {
-		return (type == t.type && lexeme.compare(t.lexeme) == 0);
+		return (type.e == t.type.e && lexeme.compare(t.lexeme) == 0);
 	}
 };
 

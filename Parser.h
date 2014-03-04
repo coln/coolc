@@ -12,7 +12,7 @@
 struct StackItem {
 	int state;
 	Symbol symbol;
-	StackItem(int state = 0, Symbol s = Symbol()) : state(state), symol(s) {}
+	StackItem(int state = 0, Symbol s = Symbol()) : state(state), symbol(s) {}
 };
 struct ReduceItem {
 	int numberOfReduces;
@@ -21,30 +21,33 @@ struct ReduceItem {
 			: numberOfReduces(number), replaceBy(replaceBy) {}
 };
 
+typedef std::map<Symbol, int> actionRow_t;
+typedef std::vector<actionRow_t> action_t;
+typedef std::vector<ReduceItem> reduceRow_t;
+typedef std::vector<reduceRow_t> reduce_t;
+
+
 class Parser {
 private:
-	typedef std::map<Symbol, int> actionRow_t;
-	typedef std::vector<actionRow_t> action_t;
-	typedef std::vector<ReduceItem> reduceRow_t;
-	typedef std::vector<reduceRow_t> reduce_t;
+	static const int numStates;
+	static const int numSymbols;
+	static const NonTerminal NT_S, NT_A;
+	static const Terminal T_plus, T_int, T_end, T_error;
 	static const action_t actionTable;
-	static const reduceTable_t reduceTable;
-	NonTerminal NT_S, NT_A;
-	Terminal T_plus, T_int, T_end, T_error;
+	static const reduce_t reduceTable;
 	
 	enum States {
-		ACCEPT = 0,
-		X = -1, // ERROR
+		X = 0, // ERROR
+		ACCEPT = -1, // ERROR
 		REDUCE = -2,
 		// SHIFT > 0
-	}
-	int numStates;
+	};
 	typedef std::stack<StackItem> stack_t;
 	stack_t stack;
 	stack_t parseTree;
 	
-	static action_t initActionTable();
-	static reduce_t initReduceTable();
+	static const action_t initActionTable();
+	static const reduce_t initReduceTable();
 	int actionAt(const int&, const Symbol&);
 	ReduceItem reduceAt(const int&, const Symbol&);
 	Symbol& tokenToSymbol(const Token&);
@@ -54,10 +57,7 @@ public:
 	bool verbose;
 	bool showTree;
 	std::vector<Token> tokens;
-	Parser() : verbose(false), showTree(false),
-					numStates(5),
-					NT_S("S"), NT_A("A"),
-					T_plus("+"), T_int("int"), T_end("$"), T_error("error");
+	Parser() : verbose(false), showTree(false) {}
 	~Parser();
 	bool analyze();
 };

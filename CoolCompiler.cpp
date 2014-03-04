@@ -1,4 +1,5 @@
 #include <getopt.h>
+#include <ifstream>
 #include <iostream>
 #include <string>
 #include "Lexer.h"
@@ -119,6 +120,7 @@ bool compile(const char* filename){
 		std::cout << "Parsing complete." << std::endl;
 		std::cout << "Compilation complete (so far)." << std::endl;
 	}
+	return true;
 }
 
 int main(int argc, char* argv[]){

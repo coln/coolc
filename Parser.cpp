@@ -1,13 +1,21 @@
 #include "Parser.h"
 
 // Init tables
+const int Parser::numStates = 5;
+const int Parser::numSymbols = 5;
+const NonTerminal Parser::NT_S("S");
+const NonTerminal Parser::NT_A("A");
+const Terminal Parser::T_plus("+");
+const Terminal Parser::T_int("int");
+const Terminal Parser::T_end("$");
+const Terminal Parser::T_error("error");
 const action_t Parser::actionTable = Parser::initActionTable();
 const reduce_t Parser::reduceTable = Parser::initReduceTable();
-static action_t Parser::initActionTable(){
+const action_t Parser::initActionTable() {
 	action_t table;
 	
 	// One way to do it
-	actionRow_t rows[numStates](5, T_error);
+	actionRow_t rows[numStates];
 	rows[0][NT_S] = ACCEPT;
 	rows[0][NT_A] = 1;
 	rows[0][T_int] = 2;
@@ -26,14 +34,13 @@ static action_t Parser::initActionTable(){
 	table.clear();
 	
 	// Another way to do it
-	std::vector<Symbol> indices;
+	std::vector<Symbol> indices(numIndices);
 	indices.push_back(NT_A);
 	indices.push_back(T_plus);
 	indices.push_back(T_int);
 	indices.push_back(T_end);
 	indices.push_back(NT_S);
 	
-	int numIndices = indices.size();
 	int actions[numStates][numIndices - 1] = {
 		{ 1, X, 2, ACCEPT },
 		{ X, X, X, REDUCE },
@@ -57,7 +64,7 @@ static action_t Parser::initActionTable(){
 	
 	return table;
 }
-static reduce_t Parser::initReduceTable(){
+const reduce_t Parser::initReduceTable(){
 	reduce_t table;
 	
 	int numIndices = 1;
@@ -113,13 +120,13 @@ bool Parser::analyze(){
 	StackItem *top;
 	
 	// Init the stack
-	stack.push(StackItem(0, NT_S));
+	stack.push(StackItem(0, Parser::NT_S));
 	next = tokenToSymbol(tokens[i]);
 	
 	while(true){
 		top = &stack.top();
 		parseTree.push(stack.top());
-		if(next == T_error){
+		if(next == Parser::T_error){
 			std::cerr << "Parser: Error in parsing token \"" << token[i].lexeme << "\" ";
 			std::cerr << "on line " << token[i].line << std::endl;
 		}

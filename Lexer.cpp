@@ -29,7 +29,7 @@ TokenType Lexer::getNextType(){
 	if(c == ';') return TokenType::SEMICOLON;
 	return TokenType::ERROR;
 }
-char popInput(){
+char Lexer::popInput(){
 	if(input.size() <= 0){
 		return '\0';
 	}
@@ -38,56 +38,53 @@ char popInput(){
 	return c;
 }
 // No keywords for now
-TokenType findKeyword(std::string lexeme){
-	return TokenType::INDENTIFER;
+TokenType Lexer::findKeyword(std::string lexeme){
+	return TokenType::IDENTIFIER;
 }
 
-void storeToken(const TokenType &type, const std::string lexeme, const int &line){
-	tokens.push(Token(type, lexeme, line));
+void Lexer::storeToken(const TokenType &type, const std::string lexeme, const int &line){
+	tokens.push_back(Token(type, lexeme, line));
 	if(verbose){
 		std::cout << "Token: \"" << std::setw(8) << std::left <<  lexeme << "\" ";
 		std::cout << "Type: " << TokenType::toString(type) << std::endl;
 	}
 }
 
-bool analyze(){
+bool Lexer::analyze(){
 	int line = 0;
 	TokenType tokenType;
 	std::string lexeme;
 	
 	TokenType nextType = getNextType();
-	char next = popInput();
-	while(next != CharType::END){
+	while(nextType != TokenType::END){
 		lexeme = "";
-		switch(next){
+		switch(nextType){
 			case TokenType::DIGIT:
 				while(nextType == TokenType::DIGIT){
-					lexeme += next;
+					lexeme += popInput();
 					nextType = getNextType();
-					next = popInput();
 				}
 				tokenType = TokenType::INTEGER;
 				break;
 			case TokenType::LETTER:
 				while(nextType == TokenType::LETTER || nextType == TokenType::DIGIT){
-					lexeme += next;
+					lexeme += popInput();
 					nextType = getNextType();
-					next = popInput();
 				}
 				tokenType = findKeyword(lexeme);
 				break;
 			case TokenType::ERROR:
-				std::cerr << "Lexer: Error in \"" << filename << "\" near line " << lines;
+				std::cerr << "Lexer: Error in \"" << filename << "\" near line " << line;
 				std::cerr << std::endl;
 				return false;
 			default:
+				char next = popInput();
 				if(next == '\n'){
 					line++;
 				}
 				tokenType = nextType;
 				lexeme = next;
 				nextType = getNextType();
-				next = popInput();
 		}
 		// No whitespace for now
 		if(tokenType != TokenType::WHITESPACE){
@@ -95,4 +92,5 @@ bool analyze(){
 		}
 	}
 	storeToken(TokenType::END, "", line);
+	return true;
 }
