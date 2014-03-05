@@ -37,21 +37,21 @@ private:
 	static const reduce_t reduceTable;
 	
 	enum States {
+		ACCEPT = -1,
 		X = 0, // ERROR
-		ACCEPT = -1, // ERROR
-		REDUCE = -2,
+		REDUCE = -2
 		// SHIFT > 0
 	};
 	typedef std::stack<StackItem> stack_t;
 	stack_t stack;
-	stack_t parseTree;
+	std::string parseTree;
 	
 	static const action_t initActionTable();
 	static const reduce_t initReduceTable();
 	int actionAt(const int&, const Symbol&);
 	ReduceItem reduceAt(const int&, const Symbol&);
-	Symbol& tokenToSymbol(const Token&);
-	void showParseTree();
+	Symbol tokenToSymbol(const Token&);
+	void updateParseTree();
 	
 public:
 	bool verbose;

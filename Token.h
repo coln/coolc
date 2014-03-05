@@ -33,6 +33,9 @@ struct TokenType {
 	} e;
 	TokenType(Enum e = ERROR) : e(e) {}
 	operator Enum() { return e; }
+	bool operator==(const Enum &t) const {
+		return (e == t);
+	}
 	static const char* toString(const TokenType &t) {
 		switch(t.e){
 			case ERROR: return "ERROR";

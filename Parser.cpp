@@ -12,105 +12,75 @@ const Terminal Parser::T_error("error");
 const action_t Parser::actionTable = Parser::initActionTable();
 const reduce_t Parser::reduceTable = Parser::initReduceTable();
 const action_t Parser::initActionTable() {
-	action_t table;
+	action_t table(numStates);
 	
 	// One way to do it
-	actionRow_t rows[numStates];
-	rows[0][NT_S] = ACCEPT;
-	rows[0][NT_A] = 1;
-	rows[0][T_int] = 2;
-	rows[0][T_end] = ACCEPT;
-	rows[1][T_end] = REDUCE;
-	rows[2][T_plus] = 3;
-	rows[2][T_end] = REDUCE;
-	rows[3][NT_A] = 4;
-	rows[3][T_int] = 2;
-	rows[4][T_end] = REDUCE;
-	int count = numStates;
-	while(--count >= 0){
-		table.push_back(rows[count]);
-	}
-	
-	table.clear();
-	
-	// Another way to do it
-	std::vector<Symbol> indices(numIndices);
-	indices.push_back(NT_A);
-	indices.push_back(T_plus);
-	indices.push_back(T_int);
-	indices.push_back(T_end);
-	indices.push_back(NT_S);
-	
-	int actions[numStates][numIndices - 1] = {
-		{ 1, X, 2, ACCEPT },
-		{ X, X, X, REDUCE },
-		{ X, 3, X, REDUCE },
-		{ 4, X, 2, X },
-		{ X, X, X, REDUCE }
-	};
-	
-	int i, j;
-	actionRow_t row;
-	for(i = 0; i < numStates; i++){
-		for(j = 0; j < numIndices; j++){
-			if(j == numIndices - 1){
-				row[NT_S] = ACCEPT;
-				continue;
-			}
-			row[indices[j]] = actions[i][j];
-		}
-		table.push_back(row);
-	}
-	
+	// The rest will automatically init to 0 (X/ERROR)
+	table[0][NT_S] = ACCEPT;
+	table[0][NT_A] = 1;
+	table[0][T_int] = 2;
+	table[0][T_end] = ACCEPT;
+	table[1][T_end] = REDUCE;
+	table[2][T_plus] = 3;
+	table[2][T_end] = REDUCE;
+	table[3][NT_A] = 4;
+	table[3][T_int] = 2;
+	table[4][T_end] = REDUCE;
+
 	return table;
 }
 const reduce_t Parser::initReduceTable(){
-	reduce_t table;
-	
 	int numIndices = 1;
-	reduceRow_t rows[numStates](1, ReduceItem(0, T_error));
-	rows[1] = ReduceItem(1, NT_S);
-	rows[2] = ReduceItem(1, NT_A);
-	rows[4] = ReduceItem(3, NT_A);
-	int count = numStates;
-	while(--count >= 0){
-		table.push_back(rows[count]);
-	}
+	reduceRow_t blankRow(numIndices, ReduceItem(0, T_error));
+	reduce_t table(numStates, blankRow);
+	
+	table[1][0] = ReduceItem(1, NT_S);
+	table[2][0] = ReduceItem(1, NT_A);
+	table[4][0] = ReduceItem(3, NT_A);
+	
 	return table;
 }
 
 
 Parser::~Parser(){
-	stack.clear();
+	int size = stack.size();
+	while(size-- > 0){
+		stack.pop();
+	}
 	tokens.clear();
 }
 
-Symbol& Parser::tokenToSymbol(const Token& token){
+Symbol Parser::tokenToSymbol(const Token& token){
 	if(token.type == TokenType::PLUS) return T_plus;
 	if(token.type == TokenType::INTEGER) return T_int;
 	if(token.type == TokenType::END) return T_end;
 	return T_error;
 }
 
-int actionAt(const int &state, const Symbol &next){
-	if(next == NT_S) return ACCEPT;
-	if
+int Parser::actionAt(const int &state, const Symbol &next){
+	return actionTable[state].find(next)->second;
+}
+ReduceItem Parser::reduceAt(const int &state, const Symbol &next){
+	// There is only one index for every state, see Grammar
+	return reduceTable[state][0];
 }
 
 // Yea I don't think this is good for large stacks.
-void Parser::parseTree(){
+void Parser::updateParseTree(){
 	// Reverse the stack
+	stack_t stack2 = stack;
 	stack_t reverse;
-	int size = parseTree.size();
+	int size = stack2.size();
 	while(size-- > 0){
-		reverse.push(parseTree.top());
-		parseTree.pop();
+		reverse.push(stack2.top());
+		stack2.pop();
 	}
 	size = reverse.size();
 	while(size-- > 0){
-		std::cout << reverse.top().symbol.value << std::endl;
+		parseTree += reverse.top().symbol.value + " ";
 		reverse.pop();
 	}
+	parseTree += '\n';
 }
 
 bool Parser::analyze(){
@@ -121,37 +91,38 @@ bool Parser::analyze(){
 	
 	// Init the stack
 	stack.push(StackItem(0, Parser::NT_S));
-	next = tokenToSymbol(tokens[i]);
+	next = tokenToSymbol(tokens[index]);
 	
 	while(true){
 		top = &stack.top();
-		parseTree.push(stack.top());
-		if(next == Parser::T_error){
-			std::cerr << "Parser: Error in parsing token \"" << token[i].lexeme << "\" ";
-			std::cerr << "on line " << token[i].line << std::endl;
+		if(next == T_error){
+			std::cerr << "Parser: Error in parsing token \"" << tokens[index].lexeme << "\" ";
+			std::cerr << "on line " << tokens[index].line << std::endl;
 		}
 		action = actionAt(top->state, next);
 		
 		if(verbose){
-			std::cout << "Top Stack: state = " << top->state << ", next = \"" << next->value << "\"";
+			std::cout << "Top Stack: state = " << top->state << ", next = \"" << next.value << "\"";
 			std::cout << std::endl;
 			std::cout << "Action: ";
 			if(action == ACCEPT) std::cout << "ACCEPT";
-			if(action == ERROR) std::cout << "ERROR";
+			if(action == X) std::cout << "ERROR";
 			if(action == REDUCE && stack.size() == 1) std::cout << "REDUCE TO FINAL";
 			if(action == REDUCE) std::cout << "REDUCE";
 			if(action > 0) std::cout << "SHIFT, GOTO STATE " << action;
-			std::cout << std::endl << std::endl;
+			std::cout << std::endl;
 		}
+		
+		updateParseTree();
 		
 		if(action == ACCEPT){
 			if(showTree){
-				parseTree();
+				std::cout << parseTree << std::endl;
 			}
 			return true;
-		}else if(action == ERROR){
-			std::cerr << "Parser: Error in parsing token \"" << token[i].lexeme << "\" ";
-			std::cerr << "on line " << token[i].line << std::endl;
+		}else if(action == X){
+			std::cerr << "Parser: Error in parsing token \"" << tokens[index].lexeme << "\" ";
+			std::cerr << "on line " << tokens[index].line << std::endl;
 			std::cerr << "Invalid move." << std::endl;
 			return false;
 		}else if(action == REDUCE){
@@ -160,13 +131,13 @@ bool Parser::analyze(){
 			while(count-- > 0){
 				stack.pop();
 			}
-			next = reduce.symbol;
-			i--;
+			next = reduce.replaceBy;
+			index--;
 			continue;
 		}else if(action > 0){
+			index++;
 			stack.push(StackItem(action, next));
-			next = tokenToSymbol(tokens[i]);
-			i++;
+			next = tokenToSymbol(tokens[index]);
 			continue;
 		}
 	}

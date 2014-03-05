@@ -12,7 +12,7 @@ TokenType Lexer::getNextType(){
 	}
 	char c = input[0];
 	if(c == ' ' || c == '\t' || c == '\n') return TokenType::WHITESPACE;
-	if((c >= 'a' && c <= 'z') || (c >= 'A' || c <= 'Z')) return TokenType::LETTER;
+	if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) return TokenType::LETTER;
 	if(c >= '0' && c <= '9') return TokenType::DIGIT;
 	if(c == '+') return TokenType::PLUS;
 	if(c == '-') return TokenType::MINUS;
@@ -45,31 +45,35 @@ TokenType Lexer::findKeyword(std::string lexeme){
 void Lexer::storeToken(const TokenType &type, const std::string lexeme, const int &line){
 	tokens.push_back(Token(type, lexeme, line));
 	if(verbose){
-		std::cout << "Token: \"" << std::setw(8) << std::left <<  lexeme << "\" ";
+		std::cout << "Token: \"" << lexeme << "\" ";
+		std::cout << std::setw(10 - lexeme.length());
 		std::cout << "Type: " << TokenType::toString(type) << std::endl;
 	}
 }
 
 bool Lexer::analyze(){
-	int line = 0;
+	int line = 1;
 	TokenType tokenType;
 	std::string lexeme;
 	
 	TokenType nextType = getNextType();
+	char next = popInput();
 	while(nextType != TokenType::END){
 		lexeme = "";
 		switch(nextType){
 			case TokenType::DIGIT:
 				while(nextType == TokenType::DIGIT){
-					lexeme += popInput();
+					lexeme += next;
 					nextType = getNextType();
+					next = popInput();
 				}
 				tokenType = TokenType::INTEGER;
 				break;
 			case TokenType::LETTER:
 				while(nextType == TokenType::LETTER || nextType == TokenType::DIGIT){
-					lexeme += popInput();
+					lexeme += next;
 					nextType = getNextType();
+					next = popInput();
 				}
 				tokenType = findKeyword(lexeme);
 				break;
@@ -78,13 +82,13 @@ bool Lexer::analyze(){
 				std::cerr << std::endl;
 				return false;
 			default:
-				char next = popInput();
 				if(next == '\n'){
 					line++;
 				}
 				tokenType = nextType;
 				lexeme = next;
 				nextType = getNextType();
+				next = popInput();
 		}
 		// No whitespace for now
 		if(tokenType != TokenType::WHITESPACE){

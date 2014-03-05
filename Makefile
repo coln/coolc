@@ -3,7 +3,7 @@ CXXFLAGS = -Wall
 RM = rm -rf
 SOURCES = CoolCompiler.cpp Lexer.cpp Parser.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
-TARGET = coolc
+TARGET = coolc.exe
 
 make: $(TARGET)
 

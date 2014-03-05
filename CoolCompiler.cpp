@@ -1,5 +1,5 @@
 #include <getopt.h>
-#include <ifstream>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include "Lexer.h"
@@ -67,14 +67,16 @@ void getFlags(int argc, char* argv[]){
 				// getopt_long reported an error, so print usage once
 				printUsage();
 				return;
+			default:
+				return;
 		}
 	}
 }
 
 std::string getFile(const char* filename){
 	std::string input;
-	ifstream inputStream;
-	inputStream.open(filename);
+	std::fstream inputStream;
+	inputStream.open(filename, std::ios_base::in);
 	if(!inputStream.is_open()){
 		std::cerr << "coolc: Could not load file \"" << filename << "\"" << std::endl;
 		return "";
@@ -105,8 +107,8 @@ bool compile(const char* filename){
 	}
 	
 	if(flags.verbose){
-		std::cout << "Lexical analysis complete.";
-		std::cout << "Parsing...";
+		std::cout << "Lexical analysis complete." << std::endl;
+		std::cout << "Parsing..." << std::endl;
 	}
 	Parser parser;
 	parser.verbose = (flags.verbose || flags.parser);
@@ -126,6 +128,7 @@ bool compile(const char* filename){
 int main(int argc, char* argv[]){
 	if(argc < 2){
 		printUsage();
+		return 1;
 	}
 	getFlags(argc, argv);
 	

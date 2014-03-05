@@ -18,9 +18,6 @@ struct SymbolType {
 	bool operator==(const SymbolType &s) const {
 		return (e == s.e);
 	}
-	bool operator<(const SymbolType &s) const {
-		return (e < s.e);
-	}
 	static const char* toString(const SymbolType &t) {
 		switch(t.e){
 			case SYMBOL: return "SYMBOL";
@@ -46,7 +43,7 @@ public:
 		return (type == s.type && value.compare(s.value) == 0);
 	}
 	bool operator<(const Symbol& s) const {
-		return (type < s.type && value.compare(s.value) < 0);
+		return (value.compare(s.value) < 0);
 	}
 };
 
