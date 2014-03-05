@@ -41,7 +41,8 @@ Reduce Table
 // Format: #/goto/sym
 // # = number of items to reduce
 // sym = symbol to replace after reduce
-state |  
+      | next
+state |  $
 ------+-------------
    0  |  x
    1  |  1/S

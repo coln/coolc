@@ -17,13 +17,13 @@ struct StackItem {
 struct ReduceItem {
 	int numberOfReduces;
 	Symbol replaceBy;
-	ReduceItem(const int &number, const Symbol &replaceBy)
+	ReduceItem(const int &number = 0, const Symbol &replaceBy = Symbol())
 			: numberOfReduces(number), replaceBy(replaceBy) {}
 };
 
 typedef std::map<Symbol, int> actionRow_t;
 typedef std::vector<actionRow_t> action_t;
-typedef std::vector<ReduceItem> reduceRow_t;
+typedef std::map<Symbol, ReduceItem> reduceRow_t;
 typedef std::vector<reduceRow_t> reduce_t;
 
 
@@ -38,7 +38,8 @@ private:
 	
 	enum States {
 		ACCEPT = -1,
-		X = 0, // ERROR
+		ERROR = 0,
+		X = ERROR,
 		REDUCE = -2
 		// SHIFT > 0
 	};
@@ -52,6 +53,7 @@ private:
 	ReduceItem reduceAt(const int&, const Symbol&);
 	Symbol tokenToSymbol(const Token&);
 	void updateParseTree();
+	void showParseTree();
 	
 public:
 	bool verbose;
