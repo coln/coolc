@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall
 RM = rm -rf
-SOURCES = CoolCompiler.cpp Lexer.cpp Parser.cpp
+SOURCES = CoolCompiler.cpp Lexer.cpp Parser.cpp ParserDefs.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = coolc
 

@@ -61,7 +61,7 @@ state |  A        B        +        *        int      (        )        $       
    1  |  x        x        x        x        x        x        x        reduce   
    2  |  x        x        shift 3  x        x        x        reduce   reduce
    3  |  shift 4  shift 2  x        x        shift 5  shift 8  x        x        
-   4  |  x        x        reduce   x        x        x        reudce   reduce
+   4  |  x        x        reduce   x        x        x        reduce   reduce
    5  |  x        x        reduce   shift 6  x        x        reduce   reduce
    6  |  x        shift 7  x        x        shift 5  shift 8  x        x        
    7  |  x        x        reduce   x        x        x        reduce   reduce
@@ -75,16 +75,16 @@ Reduce Table
 // # = number of items to reduce
 // sym = symbol to replace after reduce
       | next
-state |  x (doesn't matter)
+state |  +     )     $
 ------+-------------------
-   0  |  x
-   1  |  1/S   <-- special case
-   2  |  1/A
-   3  |  x
-   4  |  3/A
-   5  |  1/B
-   6  |  x
-   7  |  3/B
-   8  |  x
-   9  |  x
-   10 |  3/B
+   0  |  x     x     x
+   1  |  x     x     1/S
+   2  |  x     1/A   1/A
+   3  |  x     x     x
+   4  |  3/A   3/A   3/A
+   5  |  1/B   1/B   1/B
+   6  |  x     x     x
+   7  |  3/B   3/B   3/B
+   8  |  x     x     x
+   9  |  x     x     x
+   10 |  3/B   3/B   3/B
