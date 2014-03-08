@@ -1,8 +1,7 @@
 #include "Parser.h"
 
 // Init tables
-const int Parser::numStates = 5;
-const int Parser::numSymbols = 5;
+const int Parser::numStates = 11;
 const NonTerminal Parser::NT_S("S");
 const NonTerminal Parser::NT_A("A");
 const NonTerminal Parser::NT_B("B");
@@ -20,7 +19,6 @@ const action_t Parser::initActionTable() {
 	action_t table(numStates);
 	
 	// Grammar 02
-	// Ahhhhh seg fault!
 	table[0][NT_S] = ACCEPT;
 	table[0][NT_A] = 1;
 	table[0][NT_B] = 2;

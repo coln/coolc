@@ -30,7 +30,6 @@ typedef std::stack<StackItem> stack_t;
 class Parser {
 private:
 	static const int numStates;
-	static const int numSymbols;
 	static const NonTerminal NT_S, NT_A, NT_B;
 	static const Terminal T_plus, T_times, T_int, T_lparen, T_rparen;
 	static const Terminal T_end, T_error;
