@@ -30,7 +30,6 @@ typedef std::vector<reduceRow_t> reduce_t;
 class Parser {
 private:
 	static const int numStates;
-	static const int numSymbols;
 	static const NonTerminal NT_S, NT_A;
 	static const Terminal T_plus, T_int, T_end, T_error;
 	static const action_t actionTable;
