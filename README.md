@@ -19,4 +19,4 @@ struct Join {
 }
 ```
 
-Also, static const multidimensional vectors. Eeek.
+Also, static const multidimensional vectors and maps. Eeek. That was fun to work out.
