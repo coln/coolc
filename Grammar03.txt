@@ -1,0 +1,38 @@
+Grammar
+=======
+S -> A
+A -> B + A | B * A | B
+B -> int | (A)
+
+
+First/Follow
+============
+
+States
+======
+
+
+Action Table
+=============
+      | next
+state |  A        +        int        $        S
+------+-----------------------------------------------
+   0  |  
+   1  |  
+   2  |  
+   3  |  
+   4  |  
+
+Reduce Table
+=============
+// Format: #/sym
+// # = number of items to reduce
+// sym = symbol to replace after reduce
+      | next
+state |  $
+------+-------------
+   0  |  
+   1  |  
+   2  |  
+   3  |  
+   4  |  
