@@ -1,8 +1,11 @@
 Grammar
 =======
 S -> A
-A -> B + A | B * A | B
-B -> int | (A)
+A -> B + A | C * A
+B -> int | (B) | (A)
+C -> int | (C) | (A)
+
+Bad Grammar
 
 
 First/Follow
@@ -11,7 +14,7 @@ First(S) = { int, ( }
 First(A) = { int, ( }
 First(B) = { int, ( }
 Follow(S) = { $ }
-Follow(A) = { $, ), +, * }
+Follow(A) = { $, ) }
 Follow(B) = { $, ), +, * }
 Follow("int") = { $, ), +, * }
 Follow("(") = { int, ( }
@@ -24,21 +27,28 @@ States
 [0] S -> .A
     A -> .B + A
     A -> .B * A
-    A -> .B
     B -> .int
+    B -> .(B)
     B -> .(A)
 [1] S -> A.
 [2] A -> B. + A
  [3] A -> B + .A
+     A -> .B + A
+     A -> .B * A
+     B -> .int
+     B -> .(B)
+     B -> .(A)
   [4] A -> B + A.
 [5] A -> B. * A
  [6] A -> B * .A
   [7] A -> B * A.
-[8] A -> B.
-[9] B -> int.
-[10] B -> (.A)
- [11] B -> (A.)
-  [12] B -> (A).
+[8] B -> int.
+[9] B -> (.B)
+    B -> (.A)
+ [10] B -> (B.)
+  [11] B -> (B).
+ [12] B -> (A.)
+  [13] B -> (A).
 
 Action Table
 =============
@@ -50,13 +60,13 @@ Action Table
       | next
 state |  A  B  +  *  (  )  int  $  S
 ------+--------------------------------
-   0  |  1  x  x  x  10 x  9    =  =
+   0  |  1  x  x  x  9  x  8    =  =
    1  |  x  x  x  x  x  x  x    r
    2  |  x  x  3  x  x  x  x    x
-   3  |  4  8  x  x  10 x  9    x
-   4  |  x  x  r  r  x  r  x    r
+   3  |  4  ?  x  x  9  x  8    x
+   4  |  x  x  x  x  x  r  x    r
    5  |  x  x  x  6  x  x  x    x
-   6  |  7  8  x  x  10 x  9    x
+   6  |  7  0  x  x  10 x  9    x
    7  |  x  x  r  r  x  r  x    r
    8  |  x  x  r  r  x  r  x    r
    9  |  x  x  r  r  x  r  x    r
