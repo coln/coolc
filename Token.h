@@ -14,10 +14,11 @@ struct TokenType {
 		IDENTIFIER,
 		KEYWORD,
 		INTEGER,
+		FLOAT,
 		
 		PLUS,
 		MINUS,
-		TIMES,
+		ASTERISK,
 		DIVIDE,
 		EQUALS,
 		
@@ -46,9 +47,10 @@ struct TokenType {
 			case IDENTIFIER: return "IDENTIFIER";
 			case KEYWORD: return "KEYWORD";
 			case INTEGER: return "INTEGER";
+			case FLOAT: return "FLOAT";
 			case PLUS: return "PLUS";
 			case MINUS: return "MINUS";
-			case TIMES: return "TIMES";
+			case ASTERISK: return "ASTERISK";
 			case DIVIDE: return "DIVIDE";
 			case EQUALS: return "EQUALS";
 			case OPEN_PAREN: return "OPEN_PAREN";

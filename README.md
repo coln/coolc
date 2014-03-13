@@ -23,7 +23,5 @@ Hand Written
 ============
 I understand hand-writing things are usually not the way to program, however I am 
 learning so it's all good. After reading [this overview on Bison's tables](http://www.cs.uic.edu/~spopuri/cparser.html),
-I am going to try to rework all the grammar more succintly rather than with large space-eating multi-dimen vectors. 
-Why I didn't do this before, who knows. Brute-force it til it works, then optimize!
-
-But honestly, after the `grammar03` branch, I think I'm satisfied with learning. Time to whip out bison.
+I realized that to keep going on the route I'm traveling down I would have to optimize all these tables
+and pretty much create a mini-Bison. So....nah. I think I got the gist.

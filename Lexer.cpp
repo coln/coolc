@@ -16,7 +16,7 @@ TokenType Lexer::getNextType(){
 	if(c >= '0' && c <= '9') return TokenType::DIGIT;
 	if(c == '+') return TokenType::PLUS;
 	if(c == '-') return TokenType::MINUS;
-	if(c == '*') return TokenType::TIMES;
+	if(c == '*') return TokenType::ASTERISK;
 	if(c == '/') return TokenType::DIVIDE;
 	if(c == '=') return TokenType::EQUALS;
 	if(c == '(') return TokenType::OPEN_PAREN;
@@ -62,12 +62,18 @@ bool Lexer::analyze(){
 		lexeme = "";
 		switch(nextType){
 			case TokenType::DIGIT:
-				while(nextType == TokenType::DIGIT){
+				bool floatFlag = false;
+				while(nextType == TokenType::DIGIT || nextType == TokenType::PERIOD){
 					lexeme += next;
 					nextType = getNextType();
 					next = popInput();
+					floatFlag = (!floatFlag && nextType == TokenType::PERIOD);
 				}
-				tokenType = TokenType::INTEGER;
+				if(floatFlag){
+					tokenType = TokenType::FLOAT;
+				}else{
+					tokenType = TokenType::INTEGER;
+				}
 				break;
 			case TokenType::LETTER:
 				while(nextType == TokenType::LETTER || nextType == TokenType::DIGIT){
