@@ -1,6 +1,5 @@
 #include "Parser.h"
 
-
 // Init tables
 const int Parser::numStates = 13;
 const NonTerminal Parser::NT_S("S");
