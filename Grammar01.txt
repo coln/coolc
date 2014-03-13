@@ -17,7 +17,7 @@ States
 [0] S -> .A
     A -> .int + A
     A -> .int
-[1] S -> A.
+[1] S -> A. (ACCEPT)
 [2] A -> int. + A
     A -> int.
  [3] A -> int +. A
@@ -27,20 +27,24 @@ States
 
 Action Table
 =============
+// A = accept
+// x = error
+// s# = shift to state #
+// r = reduce
       | next
-state |  A        +        int        $        S
+state |  A    +   int  $   S
 ------+-----------------------------------------------
-   0  |  shift 1  x        shift 2   accept    accept
-   1  |  x        x        x         reduce
-   2  |  x        shift 3  x         reduce
-   3  |  shift 4  x        shift 2   x
-   4  |  x        x        x         reduce
+   0  |  s1   x   s2   A   A
+   1  |  x    x   x    r
+   2  |  x    s3  x    r
+   3  |  s4   x   s2   x
+   4  |  x    x   x    r
 
 Reduce Table
 =============
-// Format: #/goto/sym
-// # = number of items to reduce
-// sym = symbol to replace after reduce
+// Format: #/Symbol
+// # = # to reduce by
+// Symbol = symbol to replace by
       | next
 state |  $
 ------+-------------
