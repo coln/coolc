@@ -1,19 +1,20 @@
 #include <getopt.h>
-#include <fstream>
+#include <cstdio>
 #include <iostream>
-#include <string>
-#include "Lexer.h"
-#include "Parser.h"
+#include "parser.yy.h"
+extern int yylex();
+extern FILE* yyin;
 
 struct Flags {
 	int verbose;
 	int lexer;
 	int parser;
 	int parseTree;
+	char* output;
 } flags;
 
 void printUsage(){
-	std::cout << "Usage: coolc [-vplt] file ...\n"
+	std::cout << "Usage: coolc [-vplto] file ...\n"
 					 "\n"
 					 "   Options\n"
 					 "       -v, --verbose\n"
@@ -27,6 +28,10 @@ void printUsage(){
 					 "\n"
 					 "       -t, --tree, --parse-tree\n" 
 					 "           Show the final parse tree\n"
+					 "\n"
+					 "       -o, --output=FILE\n"
+					 "           Specify a file FILE to name the output executable\n"
+					 "           Default is a.out\n"
 					;
 }
 
@@ -38,11 +43,12 @@ void getFlags(int argc, char* argv[]){
 			{"lexer", no_argument, &flags.lexer, 1},
 			{"parser", no_argument, &flags.parser, 1},
 			{"tree", no_argument, &flags.parseTree, 1},
-			{"parse-tree", no_argument, &flags.parseTree, 1}
+			{"parse-tree", no_argument, &flags.parseTree, 1},
+			{"output", required_argument, 0, 'o'}
 		};
 		// getopt_long stores the option index here
 		int option_index = 0;
-		flag = getopt_long(argc, argv, "vlpt", long_options, &option_index);
+		flag = getopt_long(argc, argv, "vlpto:", long_options, &option_index);
 		switch(flag){
 			// These flags are set by getopt_long
 			case 0: // verbose
@@ -63,6 +69,9 @@ void getFlags(int argc, char* argv[]){
 			case 't':
 				flags.parseTree = 1;
 				break;
+			case 'o':
+				flags.output = optarg;
+				break;
 			case '?':
 				// getopt_long reported an error, so print usage once
 				printUsage();
@@ -73,55 +82,13 @@ void getFlags(int argc, char* argv[]){
 	}
 }
 
-std::string getFile(const char* filename){
-	std::string input;
-	std::fstream inputStream;
-	inputStream.open(filename, std::ios_base::in);
-	if(!inputStream.is_open()){
-		std::cerr << "coolc: Could not load file \"" << filename << "\"" << std::endl;
-		return "";
-	}
-	std::string line;
-	while(getline(inputStream, line)){
-		input += line + '\n';
-	}
-	return input;
-}
-
 bool compile(const char* filename){
-	std::string input = getFile(filename);
-	if(input == ""){
-		return false;
+	FILE* file = fopen(filename, "r");
+	if(!file){
+		std::cerr << "coolc: Could not load file \"" << filename << "\"" << std::endl;
 	}
-	
-	if(flags.verbose){
-		std::cout << "Compiling file \"" << filename << "\"..." << std::endl;
-		std::cout << "Lexical analysis..." << std::endl;
-	}
-	Lexer lexer;
-	lexer.verbose = (flags.verbose || flags.lexer);
-	lexer.filename = filename;
-	lexer.input = input;
-	if(!lexer.analyze()){
-		return false;
-	}
-	
-	if(flags.verbose){
-		std::cout << "Lexical analysis complete." << std::endl;
-		std::cout << "Parsing..." << std::endl;
-	}
-	Parser parser;
-	parser.verbose = (flags.verbose || flags.parser);
-	parser.showTree = (flags.parseTree);
-	parser.tokens = lexer.tokens;
-	if(!parser.analyze()){
-		return false;
-	}
-	
-	if(flags.verbose){
-		std::cout << "Parsing complete." << std::endl;
-		std::cout << "Compilation complete (so far)." << std::endl;
-	}
+	yyin = file;
+	yyparse();
 	return true;
 }
 
