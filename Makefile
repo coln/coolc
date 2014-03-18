@@ -2,16 +2,16 @@ CXX = g++
 CXXFLAGS = -Wall
 RM = rm -rf
 
-PARSER = parser.yy
-PARSER_OUT = $(PARSER:=.cpp)
-PARSER_H = $(PARSER:=.h)
-LEXER = lexer.ll
-LEXER_OUT = $(LEXER:=.cpp)
+PARSER = parser.y
+PARSER_OUT = $(PARSER:.y=.c)
+PARSER_H = $(PARSER:.y=.h)
+LEXER = lexer.l
+LEXER_OUT = $(LEXER:.l=.c)
 
 LIBS = -lfl
 
-SOURCES = CoolCompiler.cpp
-OBJECTS = $(SOURCES:.cpp=.o)
+SOURCES = CoolCompiler.c
+OBJECTS = $(SOURCES:.c=.o)
 TARGET = coolc
 
 make: $(TARGET)
