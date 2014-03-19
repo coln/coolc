@@ -1,3 +1,6 @@
+#ifndef COOL_COOL_COMPILER_H_
+#define COOL_COOL_COMPILER_H_
+
 #include <getopt.h>
 #include <cstdio>
 #include "parser.h"
@@ -15,3 +18,5 @@ struct Flags {
 void printUsage();
 void getFlags(int, char**);
 bool compile(const char*);
+
+#endif

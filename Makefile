@@ -10,7 +10,7 @@ LEXER_OUT = $(LEXER:.l=.c)
 
 LIBS = -lfl
 
-SOURCES = CoolCompiler.c
+SOURCES = CoolCompiler.c CoolMath.c
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = coolc
 

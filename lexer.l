@@ -9,11 +9,13 @@ DIGIT   [0-9]
 INTEGER   {DIGIT}+
 
 SIMPLE_FLOAT   {DIGIT}+"."{DIGIT}*
-EXPONENTIAL1   {DIGIT}+[eE]["+""-"]?{DIGIT}*
-EXPONENTIAL2   {DIGIT}+"."{DIGIT}*[eE]["+""-"]?{DIGIT}*
-FLOAT   ({SIMPLE_FLOAT}|{EXPONENTIAL1}|{EXPONENTIAL2})
+EXPONENTIAL   {DIGIT}+("."{DIGIT}*)?[eE]["+""-"]?{DIGIT}*
+FLOAT   ({SIMPLE_FLOAT}|{EXPONENTIAL})
 
-KEYWORD   (?i:"if"|"then"|"function")
+KEYWORD_ECHO   (?i:"echo")
+
+STRING   ([a-zA-Z_])?\"(\\.|[^\\"])*\"
+
 IDENTIFIER   [a-zA-Z][a-zA-Z0-9]*
 SINGLE_LINE_COMMENT   "//"(.*)
 MULTI_LINE_COMMENT   ("/*")((.*)|\n)*("*/")
@@ -21,27 +23,23 @@ MULTI_LINE_COMMENT   ("/*")((.*)|\n)*("*/")
 %%
 
 {FLOAT}   {
-	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
-	if(yylval.stringval != NULL){
-		strcpy(yylval.stringval, yytext);
-	}
+	yylval.floatval = atof(yytext);
 	return FLOAT;
 }
 
 {INTEGER}   {
-	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
-	if(yylval.stringval != NULL){
-		strcpy(yylval.stringval, yytext);
-	}
+	yylval.intval = atoi(yytext);
 	return INTEGER;
 }
-{KEYWORD}   {
+
+{KEYWORD_ECHO}   {
 	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
 	if(yylval.stringval != NULL){
 		strcpy(yylval.stringval, yytext);
 	}
-	return KEYWORD;
+	return KEYWORD_ECHO;
 }
+
 {IDENTIFIER}   {
 	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
 	if(yylval.stringval != NULL){
@@ -50,12 +48,28 @@ MULTI_LINE_COMMENT   ("/*")((.*)|\n)*("*/")
 	return IDENTIFIER;
 }
 
-{SINGLE_LINE_COMMENT}   {}  /* Do nothing with comments or whitespace */
+{STRING}   {
+	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
+	if(yylval.stringval != NULL){
+		strcpy(yylval.stringval, yytext+1);
+		yylval.stringval[strlen(yytext)-2] = '\0';
+	}
+	return STRING;
+}
+
+{SINGLE_LINE_COMMENT}   { /* Do nothing with comments or whitespace */ }
 {MULTI_LINE_COMMENT}   {}
 {WHITESPACE}   {}
 
-.   {
-	fprintf(stderr, "Lexer: Unrecognized character: %s\n", yytext);
-}
+"+"   { return PLUS; }
+"-"   { return MINUS; }
+"*"   { return TIMES; }
+"/"   { return DIVIDE; }
+"="   { return ASSIGN; }
+"("   { return LPAREN; }
+")"   { return RPAREN; }
+";"   { return SEMICOLON; }
+
+.   { /* Ignore bad characters */ }
 
 %%

@@ -1,6 +1,8 @@
 %{
+	#define YYERROR_VERBOSE 1
 #include <stdio.h>
 #include <stdlib.h>
+#include "CoolMath.h"
 int yylex();
 int yyerror(const char*);
 extern int yylineno;
@@ -9,38 +11,59 @@ extern char *yytext;
 
 %union {
 	int intval;
-	float floatval;
+	double floatval;
 	char* stringval;
 }
 
 // Define Terminals
-%token <stringval> INTEGER;
-%token <stringval> FLOAT;
-%token <stringval> KEYWORD;
+%token <intval> INTEGER;
+%token <floatval> FLOAT;
+%token <stringval> KEYWORD_ECHO;
 %token <stringval> IDENTIFIER;
+%token <stringval> STRING;
+%type <floatval> expression
 
-// Define NonTerminals
-%type <stringval> line
-%type <stringval> num
-%type <stringval> exp
+%token LPAREN
+%token RPAREN
+%token SEMICOLON
+%token ASSIGN
+
+// Precedence
+%precedence ASSIGN
+%left PLUS MINUS
+%left TIMES DIVIDE
+%left NEG
+
 
 // Grammar
 %%
-input: %empty
-| '\n'
-| input line { printf("Result: %s\n", $2); }
+program: statement SEMICOLON program
+| statement SEMICOLON
+| statement error SEMICOLON program { yyerrok; }
 ;
 
-line: num
-| exp
+statement: IDENTIFIER ASSIGN expression  { coolVarSet($1, $3); }
+| KEYWORD_ECHO expression { printf("%g\n", $2); }
+| KEYWORD_ECHO STRING { printf("%s\n", $2); }
+| expression
 ;
 
-num: INTEGER
-| FLOAT
-;
-
-exp: KEYWORD
-| IDENTIFIER
+expression: LPAREN expression RPAREN  { $$ = $2; }
+| MINUS expression %prec NEG  { $$ = -$2; }
+| expression PLUS expression  { $$ = coolAdd($1, $3); }
+| expression MINUS expression  { $$ = coolSubtract($1, $3); }
+| expression TIMES expression  { $$ = coolMultiply($1, $3); }
+| expression DIVIDE expression  { $$ = coolDivide($1, $3); }
+| INTEGER  { $$ = $1; }
+| FLOAT  { $$ = $1; }
+| IDENTIFIER  {
+	Variable* var = coolVarGet($1);
+	if(var == NULL){
+		$$ = 0;
+	}else{
+		$$ = var->value;
+	}
+}
 ;
 %%
 
