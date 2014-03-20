@@ -1,65 +1,50 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "parser.h"
 %}
 
-WHITESPACE   [ \t\r\n]+
-DIGIT   [0-9]
-INTEGER   {DIGIT}+
-
-SIMPLE_FLOAT   {DIGIT}+"."{DIGIT}*
-EXPONENTIAL   {DIGIT}+("."{DIGIT}*)?[eE]["+""-"]?{DIGIT}*
-FLOAT   ({SIMPLE_FLOAT}|{EXPONENTIAL})
-
-KEYWORD_ECHO   (?i:"echo")
-
-STRING   ([a-zA-Z_])?\"(\\.|[^\\"])*\"
-
+INTEGER      [0-9]+
+FLOAT        [0-9]+"."[0-9]*
+EXPONENTIAL  [0-9]+("."[0-9]*)?[eE]["+""-"]?[0-9]*        
+KEYWORD_ECHO (?i:"echo")
 IDENTIFIER   [a-zA-Z][a-zA-Z0-9]*
-SINGLE_LINE_COMMENT   "//"(.*)
-MULTI_LINE_COMMENT   ("/*")((.*)|\n)*("*/")
+
 
 %%
-
-{FLOAT}   {
-	yylval.floatval = atof(yytext);
-	return FLOAT;
-}
+ /*  Skip the blanks */
+[\r\n\t ]+   {}
 
 {INTEGER}   {
-	yylval.intval = atoi(yytext);
-	return INTEGER;
+	yylval.constant = atol(yytext);
+	return CONSTANT;
+}
+
+{FLOAT}   {
+	yylval.constant = atof(yytext);
+	return CONSTANT;
+}
+{EXPONENTIAL}   {
+	yylval.constant = atof(yytext);
+	return CONSTANT;
 }
 
 {KEYWORD_ECHO}   {
-	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
-	if(yylval.stringval != NULL){
-		strcpy(yylval.stringval, yytext);
+	yylval.string = (char *)malloc(strlen(yytext) + 1);
+	if(yylval.string != NULL){
+		strcpy(yylval.string, yytext);
 	}
 	return KEYWORD_ECHO;
 }
 
 {IDENTIFIER}   {
-	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
-	if(yylval.stringval != NULL){
-		strcpy(yylval.stringval, yytext);
+	yylval.string = (char *)malloc(strlen(yytext) + 1);
+	if(yylval.string != NULL){
+		strcpy(yylval.string, yytext);
 	}
 	return IDENTIFIER;
 }
-
-{STRING}   {
-	yylval.stringval = (char *)malloc(strlen(yytext) + 1);
-	if(yylval.stringval != NULL){
-		strcpy(yylval.stringval, yytext+1);
-		yylval.stringval[strlen(yytext)-2] = '\0';
-	}
-	return STRING;
-}
-
-{SINGLE_LINE_COMMENT}   { /* Do nothing with comments or whitespace */ }
-{MULTI_LINE_COMMENT}   {}
-{WHITESPACE}   {}
 
 "+"   { return PLUS; }
 "-"   { return MINUS; }
@@ -70,6 +55,5 @@ MULTI_LINE_COMMENT   ("/*")((.*)|\n)*("*/")
 ")"   { return RPAREN; }
 ";"   { return SEMICOLON; }
 
-.   { /* Ignore bad characters */ }
-
+.   {}
 %%
