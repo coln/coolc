@@ -10,4 +10,8 @@ EcHo a;
 
 class SomeClass inherits SomeOtherClass {
 	x:int <- 24;
+	emptyMethod() : Type {};
+	method(arglist:type) : Type {
+		x:int <- 24;
+	};
 };

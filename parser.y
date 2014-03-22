@@ -48,19 +48,31 @@ class_declaration
 
 class_body
 	: %empty
-	| class_body methods ';'
-	| class_body attributes ';'
+	| class_body method ';'
+	| class_body attribute ';'
 	;
 
-methods
-	: /* nothing yet */
+method
+	: IDENTIFIER '(' arg_list ')' ':' IDENTIFIER '{' method_body '}'
 	;
 
-attributes
+arg_list
+	: %empty
+	| arg_list symbol_declaration
+	;
+
+method_body
+	: %empty
+	| method_body attribute ';';
+	;
+
+attribute
+	: symbol_declaration
+	| symbol_declaration '<' '-' expression
+	;
+
+symbol_declaration
 	: IDENTIFIER ':' IDENTIFIER
-	| IDENTIFIER ':' IDENTIFIER '<' '-' expression
-	;
-
 
 
 program
