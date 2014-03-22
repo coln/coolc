@@ -22,7 +22,7 @@ const char *yyfilename;
 // Define Terminals
 %token <string> IDENTIFIER
 %token <constant> CONSTANT;
-%token KEYWORD_ECHO;
+%token KEYWORD_ECHO CLASS INHERITS;
 
 %type <constant> expression;
 
@@ -32,13 +32,43 @@ const char *yyfilename;
 %left '*' '/'
 %left NEG
 
+%start program
+
 
 // Grammar
 %%
+class
+	: class_declaration '{' class_body '}'
+	;
+
+class_declaration
+	: CLASS IDENTIFIER
+	| CLASS IDENTIFIER INHERITS IDENTIFIER
+	;
+
+class_body
+	: %empty
+	| class_body methods ';'
+	| class_body attributes ';'
+	;
+
+methods
+	: /* nothing yet */
+	;
+
+attributes
+	: IDENTIFIER ':' IDENTIFIER
+	| IDENTIFIER ':' IDENTIFIER '<' '-' expression
+	;
+
+
+
 program
 	: statement ';' program
 	| statement ';'
 	| statement error ';' program { yyerrok; }
+	| class ';'
+	| class error ';' { yyerrok; }
 	;
 
 statement

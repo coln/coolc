@@ -5,5 +5,9 @@ b = 3; -- this is a comment
 echo b;
 
 a = a / b;
-echo a;
+EcHo a;
 -- this is also a comment
+
+class SomeClass inherits SomeOtherClass {
+	x:int <- 24;
+};

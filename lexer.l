@@ -4,14 +4,14 @@
 #include "parser.h"
 %}
 
+%option nounput
+%option case-insensitive
+
 INTEGER      [0-9]+
 FLOAT        [0-9]+"."[0-9]*
-EXPONENTIAL  [0-9]+("."[0-9]*)?[eE]["+""-"]?[0-9]*        
-KEYWORD_ECHO (?i:"echo")
+EXPONENTIAL  [0-9]+("."[0-9]*)?[eE]["+""-"]?[0-9]*
 IDENTIFIER   [a-zA-Z][a-zA-Z0-9]*
 COMMENT      "--".*\n?
-
-%option nounput
 
 %%
  /*  Skip the blanks */
@@ -31,11 +31,9 @@ COMMENT      "--".*\n?
 	return CONSTANT;
 }
 
-{KEYWORD_ECHO}   {
-	yylval.string = (char *)malloc(strlen(yytext) + 1);
-	strcpy(yylval.string, yytext);
-	return KEYWORD_ECHO;
-}
+"echo"   { return KEYWORD_ECHO; }
+"class"   { return CLASS; }
+"inherits"   { return INHERITS; }
 
 {IDENTIFIER}   {
 	yylval.string = (char *)malloc(strlen(yytext) + 1);
@@ -44,8 +42,6 @@ COMMENT      "--".*\n?
 }
 
 {COMMENT}   {}
-
-
 
 .   { return yytext[0]; }
 %%
