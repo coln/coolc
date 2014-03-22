@@ -94,6 +94,7 @@ bool compile(const char* filename){
 		return false;
 	}
 	yyin = file;
+	yyfilename = filename;
 	yyparse();
 	return true;
 }

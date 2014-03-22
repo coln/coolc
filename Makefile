@@ -10,21 +10,17 @@ LEXER_OUT = $(LEXER:.l=.c)
 
 LIBS = -lfl
 
-SOURCES = CoolCompiler.c CoolMath.c
+SOURCES = CoolCompiler.c CoolMath.c Symbol.c
+HEADERS = CoolCompiler.h CoolMath.h Symbol.h
 OBJECTS = $(SOURCES:.c=.o)
 TARGET = coolc
 
 make: $(TARGET)
 
-$(TARGET): $(SOURCES)
+$(TARGET): $(SOURCES) $(HEADERS) $(PARSER) $(LEXER)
 	bison -o $(PARSER_OUT) --defines=$(PARSER_H) $(PARSER)
 	flex -o $(LEXER_OUT) $(LEXER)
 	$(CXX) $(CXXFLAGS) $(LIBS) -o $@ $(SOURCES) $(PARSER_OUT) $(LEXER_OUT)
-
-bison:
-	bison -o $(PARSER_OUT) --defines=$(PARSER_H) $(PARSER)
-	flex -o $(LEXER_OUT) $(LEXER)
-	$(CXX) $(CXXFLAGS) $(LIBS) $(PARSER_OUT) -o bisontest
 
 clean:
 	$(RM) $(OBJECTS) $(TARGET)

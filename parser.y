@@ -2,11 +2,14 @@
 #define YYERROR_VERBOSE 1
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "CoolMath.h"
+#include "Symbol.h"
 int yylex();
-int yyerror(const char *);
+int yyerror(const char *, ...);
 extern int yylineno;
 extern char *yytext;
+const char *yyfilename;
 %}
 
 %locations
@@ -20,41 +23,40 @@ extern char *yytext;
 %token <string> IDENTIFIER
 %token <constant> CONSTANT;
 %token KEYWORD_ECHO;
-%token LPAREN "(" RPAREN ")" SEMICOLON ";";
 
 %type <constant> expression;
 
 // Precedence
-%precedence ASSIGN
-%left PLUS MINUS
-%left TIMES DIVIDE
+%precedence '='
+%left '+' '-'
+%left '*' '/'
 %left NEG
 
 
 // Grammar
 %%
 program
-	: statement SEMICOLON program
-	| statement SEMICOLON
-	| statement error SEMICOLON program { yyerrok; }
+	: statement ';' program
+	| statement ';'
+	| statement error ';' program { yyerrok; }
 	;
 
 statement
-	: IDENTIFIER ASSIGN expression  { coolVarSet($1, $3); }
+	: IDENTIFIER '=' expression  { setSymbol($1, $3); }
 	| KEYWORD_ECHO expression { printf("%g\n", $2); }
 	| expression
 	;
 
 expression
-	: LPAREN expression RPAREN  { $$ = $2; }
-	| MINUS expression %prec NEG  { $$ = -$2; }
-	| expression PLUS expression  { $$ = coolAdd($1, $3); }
-	| expression MINUS expression  { $$ = coolSubtract($1, $3); }
-	| expression TIMES expression  { $$ = coolMultiply($1, $3); }
-	| expression DIVIDE expression  { $$ = coolDivide($1, $3); }
+	: '(' expression ')'  { $$ = $2; }
+	| '-' expression %prec NEG  { $$ = -$2; }
+	| expression '+' expression  { $$ = coolAdd($1, $3); }
+	| expression '-' expression  { $$ = coolSubtract($1, $3); }
+	| expression '*' expression  { $$ = coolMultiply($1, $3); }
+	| expression '/' expression  { $$ = coolDivide($1, $3); }
 	| CONSTANT  { $$ = $1; }
 	| IDENTIFIER  {
-		Variable* var = coolVarGet($1);
+		Symbol* var = getSymbol($1);
 		if(var == NULL){
 			$$ = 0;
 		}else{
@@ -65,8 +67,8 @@ expression
 %%
 
 
-int yyerror(const char *msg){
-	fprintf(stderr, "ERROR on line ");
+int yyerror(const char *msg, ...){
+	fprintf(stderr, "%s:", yyfilename);
 	if(yylloc.first_line != yylloc.last_line){
 		fprintf(stderr, "%d:%d - %d:%d",
 					yylloc.first_line, yylloc.first_column,
@@ -77,6 +79,13 @@ int yyerror(const char *msg){
 	}else{
 		fprintf(stderr, "%d:%d", yylloc.first_line, yylloc.first_column);
 	}
-	fprintf(stderr, ": %s at symbol \"%s\"\n", msg, yytext);
+	
+	// Print out the arguments in "printf" style
+	static char errmsg[10000];
+	va_list args;
+	va_start(args, msg);
+	vsprintf(errmsg, msg, args);
+	va_end(args);
+	fprintf(stderr, ": %s at symbol \"%s\"\n", errmsg, yytext);
 	return 0;
 }
