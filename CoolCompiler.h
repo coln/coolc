@@ -9,10 +9,6 @@ extern FILE* yyin;
 extern const char* yyfilename;
 
 struct Flags {
-	int verbose;
-	int lexer;
-	int parser;
-	int parseTree;
 	char* output;
 } flags;
 
