@@ -9,7 +9,7 @@ extern yy_size_t yyleng;
 int yycolumn = 1;
 
 // As defined in cool_manual.pdf (p.9)
-#define MAX_STRING_LENGTH 1024
+#define MAX_STRING_LENGTH 1025
 #define YY_USER_ACTION { \
 	yylloc.first_line = yylloc.last_line = yylineno; \
 	yylloc.first_column = yycolumn; \
