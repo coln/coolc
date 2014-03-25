@@ -29,7 +29,6 @@ const char *yyfilename;
 %token <stringType> STRING_CONSTANT
 %token <boolType> BOOL_CONSTANT
 
-%token KEYWORD_ECHO
 %token CLASS INHERITS NEW SELF
 %token LET IN CASE OF ESAC CASE_ASSIGN "=>"
 %token IF THEN ELSE FI
@@ -111,7 +110,7 @@ expression
 	| conditional
 	| loop
 	| '{' block '}'
-//	| let 
+	| let 
 	| cases
 	| NEW TYPE
 	| ISVOID expression
@@ -165,7 +164,7 @@ block
 	| block expression ';'
 	;
 
-/*let
+let
 	: LET init_attribute_list IN expression
 	;
 
@@ -173,7 +172,7 @@ init_attribute_list
 	: attribute
 	| init_attribute_list ',' attribute
 	;
-*/
+
 cases
 	: CASE expression OF case_branches ESAC
 	;

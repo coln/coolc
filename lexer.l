@@ -74,7 +74,6 @@ SINGLE_COMMENT          "--".*
 
 
  /* Keywords */
-"echo"   { return KEYWORD_ECHO; }
 "class"   { return CLASS; }
 "inherits"   { return INHERITS; }
 "new"   { return NEW; }
