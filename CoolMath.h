@@ -8,6 +8,6 @@ double coolSubtract(double, double);
 double coolMultiply(double, double);
 double coolDivide(double, double);
 
-extern int yyerror(const char*, ...);
+extern void yyerror(const char*, ...);
 
 #endif

@@ -6,110 +6,205 @@
 #include "CoolMath.h"
 #include "Symbol.h"
 int yylex();
-int yyerror(const char *, ...);
-extern int yylineno;
+void yyerror(const char *, ...);
 extern char *yytext;
+
 const char *yyfilename;
 %}
 
 %locations
 
 %union {
-	double constant;
-	char* string;
+	int boolType;
+	int intType;
+	char* stringType;
+	char* identifier;
+	char* type;
 }
 
 // Define Terminals
-%token <string> IDENTIFIER
-%token <constant> CONSTANT;
-%token KEYWORD_ECHO CLASS INHERITS;
+%token <identifier> IDENTIFIER
+%token <type> TYPE
+%token <intType> INT_CONSTANT
+%token <stringType> STRING_CONSTANT
+%token <boolType> BOOL_CONSTANT
 
-%type <constant> expression;
+%token KEYWORD_ECHO
+%token CLASS INHERITS NEW SELF
+%token LET IN CASE OF ESAC CASE_ASSIGN "=>"
+%token IF THEN ELSE FI
+%token WHILE LOOP POOL
+%token ISVOID NOT
+%token ASSIGN "<-" LTE_OP "<="
 
 // Precedence
-%precedence '='
+%right "<-"
+%left NOT
+%nonassoc '<' "<=" '='
 %left '+' '-'
 %left '*' '/'
-%left NEG
+%left ISVOID
+%left '~'
+%left '@'
+%left '.'
 
 %start program
 
 
-// Grammar
 %%
+program
+	: %empty
+	| program class
+	| program class error { yyerrok; }
+	;
+
+// Class definitions
 class
-	: class_declaration '{' class_body '}'
+	: class_declaration '{' class_body '}' ';'
+	| '{' class_body '}' ';'
 	;
 
 class_declaration
-	: CLASS IDENTIFIER
-	| CLASS IDENTIFIER INHERITS IDENTIFIER
+	: CLASS TYPE
+	| CLASS TYPE INHERITS TYPE
 	;
 
 class_body
 	: %empty
-	| class_body method ';'
 	| class_body attribute ';'
+	| class_body method ';'
 	;
 
-method
-	: IDENTIFIER '(' arg_list ')' ':' IDENTIFIER '{' method_body '}'
-	;
-
-arg_list
-	: %empty
-	| arg_list symbol_declaration
-	;
-
-method_body
-	: %empty
-	| method_body attribute ';';
-	;
-
+// Class variables/symbols/attributes
 attribute
 	: symbol_declaration
-	| symbol_declaration '<' '-' expression
+	| symbol_declaration "<-" expression
 	;
 
 symbol_declaration
-	: IDENTIFIER ':' IDENTIFIER
-
-
-program
-	: statement ';' program
-	| statement ';'
-	| statement error ';' program { yyerrok; }
-	| class ';'
-	| class error ';' { yyerrok; }
+	: IDENTIFIER ':' TYPE
 	;
 
-statement
-	: IDENTIFIER '=' expression  { setSymbol($1, $3); }
-	| KEYWORD_ECHO expression { printf("%g\n", $2); }
-	| expression
+// Method/function definitions
+method
+	: method_declaration ':' TYPE '{' expression '}'
 	;
 
+method_declaration
+	: IDENTIFIER '(' init_arg_list ')'
+	| IDENTIFIER '(' ')'
+	;
+
+init_arg_list
+	: symbol_declaration
+	| init_arg_list ',' symbol_declaration
+	;
+
+
+// Expressions
 expression
-	: '(' expression ')'  { $$ = $2; }
-	| '-' expression %prec NEG  { $$ = -$2; }
-	| expression '+' expression  { $$ = coolAdd($1, $3); }
-	| expression '-' expression  { $$ = coolSubtract($1, $3); }
-	| expression '*' expression  { $$ = coolMultiply($1, $3); }
-	| expression '/' expression  { $$ = coolDivide($1, $3); }
-	| CONSTANT  { $$ = $1; }
-	| IDENTIFIER  {
-		Symbol* var = getSymbol($1);
-		if(var == NULL){
-			$$ = 0;
-		}else{
-			$$ = var->value;
-		}
-	}
+	: '(' expression ')'
+	| constants
+	| identifiers
+	| assignment
+	| dispatch
+	| conditional
+	| loop
+	| '{' block '}'
+//	| let 
+	| cases
+	| NEW TYPE
+	| ISVOID expression
+	| arithmetic
+	| comparison
+	;
+
+
+constants
+	: BOOL_CONSTANT
+	| INT_CONSTANT
+	| STRING_CONSTANT
+	;
+
+identifiers
+	: IDENTIFIER
+	| SELF
+	;
+
+assignment
+	: IDENTIFIER ASSIGN expression
+	;
+
+dispatch
+	: dispatch_id '(' arg_list ')'
+	| dispatch_id '(' ')'
+	;
+
+dispatch_id
+	: expression '.' IDENTIFIER
+	| IDENTIFIER
+	| expression '@' TYPE '.' IDENTIFIER
+	;
+
+arg_list
+	: expression
+	| arg_list ',' expression
+	;
+
+conditional
+	: IF expression THEN expression FI
+	| IF expression THEN expression ELSE expression FI
+	;
+	
+loop
+	: WHILE expression LOOP expression POOL
+	;
+
+block
+	: expression ';'
+	| block expression ';'
+	;
+
+/*let
+	: LET init_attribute_list IN expression
+	;
+
+init_attribute_list
+	: attribute
+	| init_attribute_list ',' attribute
+	;
+*/
+cases
+	: CASE expression OF case_branches ESAC
+	;
+
+case_branches
+	: case_branch
+	| case_branches case_branch
+	;
+
+case_branch
+	: symbol_declaration "=>" expression ';'
+	;
+
+arithmetic
+	: expression '+' expression
+	| expression '-' expression
+	| expression '*' expression
+	| expression '/' expression
+	| '~' expression
+	;
+
+comparison
+	: expression '<' expression
+	| expression "<=" expression
+	| expression '=' expression
+	| NOT expression
 	;
 %%
 
 
-int yyerror(const char *msg, ...){
+void yyerror(const char *msg, ...){
 	fprintf(stderr, "%s:", yyfilename);
 	if(yylloc.first_line != yylloc.last_line){
 		fprintf(stderr, "%d:%d - %d:%d",
@@ -129,5 +224,4 @@ int yyerror(const char *msg, ...){
 	vsprintf(errmsg, msg, args);
 	va_end(args);
 	fprintf(stderr, ": %s at symbol \"%s\"\n", errmsg, yytext);
-	return 0;
 }

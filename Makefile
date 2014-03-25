@@ -1,5 +1,6 @@
 CXX = g++
 CXXFLAGS = -Wall
+CXXLIBS = -lfl
 RM = rm -rf
 
 PARSER = parser.y
@@ -8,7 +9,8 @@ PARSER_H = $(PARSER:.y=.h)
 LEXER = lexer.l
 LEXER_OUT = $(LEXER:.l=.c)
 
-LIBS = -lfl
+BISON_FLAGS = -o $(PARSER_OUT) --defines=$(PARSER_H)
+FLEX_FLAGS = -o $(LEXER_OUT)
 
 SOURCES = CoolCompiler.c CoolMath.c Symbol.c
 HEADERS = CoolCompiler.h CoolMath.h Symbol.h
@@ -18,9 +20,9 @@ TARGET = coolc
 make: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS) $(PARSER) $(LEXER)
-	bison -o $(PARSER_OUT) --defines=$(PARSER_H) $(PARSER)
-	flex -o $(LEXER_OUT) $(LEXER)
-	$(CXX) $(CXXFLAGS) $(LIBS) -o $@ $(SOURCES) $(PARSER_OUT) $(LEXER_OUT)
+	bison $(BISON_FLAGS) $(PARSER)
+	flex $(FLEX_FLAGS) $(LEXER)
+	$(CXX) $(CXXFLAGS) $(CXXLIBS) -o $@ $(SOURCES) $(PARSER_OUT) $(LEXER_OUT)
 
 clean:
 	$(RM) $(OBJECTS) $(TARGET)

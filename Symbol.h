@@ -14,6 +14,6 @@ Symbol* findSymbol(const char*);
 Symbol* getSymbol(const char*);
 Symbol* setSymbol(const char*, double);
 
-extern int yyerror(const char*, ...);
+extern void yyerror(const char*, ...);
 
 #endif
