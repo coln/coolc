@@ -1,19 +1,42 @@
-#ifndef COOLC_COOL_COMPILER_H_
-#define COOLC_COOL_COMPILER_H_
+#ifndef COOL_COOL_COMPILER_H_
+#define COOL_COOL_COMPILER_H_
 
-#include <getopt.h>
-#include <cstdio>
+#include <iostream>
+#include <map>
+#include <string>
 #include "parser.h"
-extern int yylex();
-extern FILE* yyin;
-extern const char* yyfilename;
 
-struct Flags {
-	char* output;
-} flags;
+// Tell Flex the lexer's prototype ...
+#define YY_DECL \
+	yy::CoolParser::symbol_type yylex(CoolCompiler& compiler)
+// ... and declare it for the parser's sake.
+YY_DECL;
 
-void printUsage();
-void getFlags(int, char**);
-bool compile(const char*);
+class CoolCompiler {
+public:
+	struct Flags {
+		bool verbose;
+		bool traceLexer;
+		bool traceParser;
+		std::string outputFile;
+		Flags() : verbose(false),
+						traceLexer(false), traceParser(false),
+						outputFile("") {}
+	} flags;
+	
+	std::map<std::string, int> variables;
+	std::string filename;
+	int result;
+	
+	CoolCompiler();
+	virtual ~CoolCompiler();
+	bool compile(const char*);
+	void lexerBegin();
+	void lexerEnd();
+	int parse(const std::string&);
+	void error(const yy::location&, const std::string&);
+	void error(const std::string&);
+};
+
 
 #endif
