@@ -12,59 +12,98 @@
 #undef yywrap
 #define yywrap() 1
 // The location of the current token.
-static yy::location loc;
+static yy::location location;
+
+// As defined in cool_manual.pdf (p.9)
+#define MAX_STRING_LENGTH 1025
+#define YY_USER_ACTION location.columns(yyleng);
 %}
 
 %option noyywrap nounput batch debug noinput
 
-id [a-zA-Z][a-zA-Z_0-9]*
-int [0-9]+
-blank [ \t]
+%x MULTI_COMMENT
 
-%{
-	// Code run each time a pattern is matched.
-	#define YY_USER_ACTION loc.columns(yyleng);
-%}
+INTEGER          [0-9]+
+IDENTIFIER       [a-z][a-zA-Z0-9_]*
+TYPE             [A-Z][a-zA-Z0-9_]*
+STRING_CONSTANT  \"(\\.|[^\\"])*\"
+ /* " */
+SINGLE_COMMENT          "--".*
 
 
 %%
 %{
-	// Code run each time yylex is called.
-	loc.step();
+// Code run each time yylex is called.
+location.step();
 %}
-{blank}+ { loc.step(); }
-[\n]+ { loc.lines(yyleng); loc.step(); }
 
-"-" return yy::CoolParser::make_MINUS(loc);
-"+" return yy::CoolParser::make_PLUS(loc);
-"*" return yy::CoolParser::make_STAR(loc);
-"/" return yy::CoolParser::make_SLASH(loc);
-"(" return yy::CoolParser::make_LPAREN(loc);
-")" return yy::CoolParser::make_RPAREN(loc);
-":=" return yy::CoolParser::make_ASSIGN(loc);
+<INITIAL,MULTI_COMMENT>\n {
+	location.lines(yyleng);
+	location.step();
+}
 
-{int} {
-	errno = 0;
-	long n = strtol(yytext, NULL, 10);
-	if(!(INT_MIN <= n && n <= INT_MAX && errno != ERANGE)){
-		compiler.error(loc, "integer is out of range");
+ /* Comments */
+"(*"                   { BEGIN(MULTI_COMMENT); }
+<MULTI_COMMENT><<EOF>> { compiler.error("unclosed comment"); BEGIN(INITIAL); }
+<MULTI_COMMENT>"*)"    { BEGIN(INITIAL); }
+<MULTI_COMMENT>.       {}
+	
+{SINGLE_COMMENT}   {}
+
+
+ /* Constants */
+{INTEGER}  { return yy::CoolParser::make_INT_CONSTANT(atol(yytext), location); }
+{STRING_CONSTANT}  {
+	int len = strlen(yytext);
+	if(len > MAX_STRING_LENGTH){
+		compiler.error("string constant length too long");
+		len = MAX_STRING_LENGTH;
 	}
-	return yy::CoolParser::make_NUMBER(n, loc);
+	return yy::CoolParser::make_STRING_CONSTANT(yytext, location);
 }
 
-{id} {
-	return yy::CoolParser::make_IDENTIFIER(yytext, loc);
-}
+ /* Booleans */
+"t"(?i:"rue")  { return yy::CoolParser::make_BOOL_CONSTANT(true, location); }
+"f"(?i:"alse")  { return yy::CoolParser::make_BOOL_CONSTANT(false, location); }
 
-. {
-	compiler.error(loc, "invalid character");
-}
 
-<<EOF>> {
-	return yy::CoolParser::make_END(loc);
-}
+ /* Keywords */
+"class"  { return yy::CoolParser::make_CLASS(location); }
+"inherits"  { return yy::CoolParser::make_INHERITS(location); }
+"new"  { return yy::CoolParser::make_NEW(location); }
+"self"  { return yy::CoolParser::make_SELF(location); }
+"let"  { return yy::CoolParser::make_LET(location); }
+"in"  { return yy::CoolParser::make_IN(location); }
+"case"  { return yy::CoolParser::make_CASE(location); }
+"of"  { return yy::CoolParser::make_OF(location); }
+"esac"  { return yy::CoolParser::make_ESAC(location); }
+"if"  { return yy::CoolParser::make_IF(location); }
+"then"  { return yy::CoolParser::make_THEN(location); }
+"else"  { return yy::CoolParser::make_ELSE(location); }
+"fi"  { return yy::CoolParser::make_FI(location); }
+"while"  { return yy::CoolParser::make_WHILE(location); }
+"loop"  { return yy::CoolParser::make_LOOP(location); }
+"pool"  { return yy::CoolParser::make_POOL(location); }
+"isvoid"  { return yy::CoolParser::make_ISVOID(location); }
+"not"  { return yy::CoolParser::make_NOT(location); }
+
+ /* Other operators */
+"<="  { return yy::CoolParser::make_LTE_OP(location); }
+"=>"  { return yy::CoolParser::make_CASE_ASSIGN(location); }
+"<-"  { return yy::CoolParser::make_ASSIGN(location); }
+
+ /* Identifiers/Types */
+{IDENTIFIER}  { return yy::CoolParser::make_IDENTIFIER(yytext, location); }
+{TYPE}  { return yy::CoolParser::make_TYPE(yytext, location); }
+
+
+ /*  Skip the blanks */
+[ \t\v\r\f]  { location.step(); }
+
+
+.  { compiler.error(location, "invalid character"); }
+<<EOF>>  { return yy::CoolParser::make_END(location); }
 %%
-
 
 void CoolCompiler::lexerBegin(){
 	yy_flex_debug = flags.verbose || flags.traceLexer;

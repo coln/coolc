@@ -27,7 +27,22 @@ int CoolCompiler::parse(const std::string& filename){
 }
 
 void CoolCompiler::error(const yy::location& location, const std::string& msg){
-	std::cerr << location << ": " << msg << std::endl; 
+	// Because line.column format is just too good for me...
+	std::cerr << filename << ":";
+	if(location.begin.line != location.end.line){
+		std::cerr << location.begin.line << ":" << location.begin.column;
+		std::cerr << " - ";
+		std::cerr << location.end.line << ":" << location.end.column;
+		std::cerr << std::endl;
+	}else if(location.begin.column < location.end.column - 1){
+		std::cerr << location.begin.line << ":" << location.begin.column;
+		std::cerr << " - ";
+		std::cerr << location.end.column - 1;
+		std::cerr << std::endl;
+	}else{
+		std::cerr << location.begin.line << ":" << location.begin.column;
+		std::cerr << std::endl;
+	}
 }
 void CoolCompiler::error(const std::string& msg){
 	std::cerr << msg << std::endl;

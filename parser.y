@@ -1,42 +1,34 @@
-%skeleton "lalr1.cc"
-%require "3.0.2"
-%define parser_class_name {CoolParser}
-%define api.token.constructor
-%define api.value.type variant
-%define parse.assert
-
-%code requires {
+%{
 #define YYERROR_VERBOSE 1
-#include <string>
-class CoolCompiler;
-}
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include "CoolMath.h"
+#include "Symbol.h"
+int yylex();
+void yyerror(const char *, ...);
+extern char *yytext;
 
-// The parsing context.
-%param { CoolCompiler& compiler }
+const char *yyfilename;
+%}
+
 %locations
-%initial-action {
-	// Initialize the initial location.
-	@$.begin.filename = @$.end.filename = &compiler.filename;
-};
 
-%define parse.trace
-%define parse.error verbose
-
-%code {
-#include "CoolCompiler.h"
+%union {
+	int boolType;
+	int intType;
+	char* stringType;
+	char* identifier;
+	char* type;
 }
-
-%printer { yyoutput << $$; } <*>;
 
 // Define Terminals
-%define api.token.prefix {TOK_}
-%token <std::string> IDENTIFIER
-%token <std::string> TYPE
-%token <int> INT_CONSTANT
-%token <std::string> STRING_CONSTANT
-%token <bool> BOOL_CONSTANT
+%token <identifier> IDENTIFIER
+%token <type> TYPE
+%token <intType> INT_CONSTANT
+%token <stringType> STRING_CONSTANT
+%token <boolType> BOOL_CONSTANT
 
-%token END 0
 %token CLASS INHERITS NEW SELF
 %token LET IN CASE OF ESAC CASE_ASSIGN "=>"
 %token IF THEN ELSE FI
@@ -61,12 +53,12 @@ class CoolCompiler;
 %%
 program
 	: %empty
-	| program class_definition
-	| program class_definition error { yyerrok; }
+	| program class
+	| program class error { yyerrok; }
 	;
 
 // Class definitions
-class_definition
+class
 	: class_declaration '{' class_body '}' ';'
 	| '{' class_body '}' ';'
 	;
@@ -210,6 +202,25 @@ comparison
 	;
 %%
 
-void yy::CoolParser::error(const location_type& location, const std::string& msg){
-	compiler.error(location, msg);
+
+void yyerror(const char *msg, ...){
+	fprintf(stderr, "%s:", yyfilename);
+	if(yylloc.first_line != yylloc.last_line){
+		fprintf(stderr, "%d:%d - %d:%d",
+					yylloc.first_line, yylloc.first_column,
+					yylloc.last_line, yylloc.last_column - 1);
+	}else if(yylloc.first_column < yylloc.last_column - 1){
+		fprintf(stderr, "%d:%d - %d", yylloc.first_line,
+					yylloc.first_column, yylloc.last_column - 1);
+	}else{
+		fprintf(stderr, "%d:%d", yylloc.first_line, yylloc.first_column);
+	}
+	
+	// Print out the arguments in "printf" style
+	static char errmsg[10000];
+	va_list args;
+	va_start(args, msg);
+	vsprintf(errmsg, msg, args);
+	va_end(args);
+	fprintf(stderr, ": %s at symbol \"%s\"\n", errmsg, yytext);
 }
