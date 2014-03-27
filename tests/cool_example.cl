@@ -22,7 +22,7 @@ class List inherits A2I {
 				item.concat(next.flatten())
 			fi
 	};
-}
+};
 
 class Main inherits IO {
 	

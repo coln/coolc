@@ -63,8 +63,8 @@ location.step();
 }
 
  /* Booleans */
-"t"(?i:"rue")  { return yy::CoolParser::make_BOOL_CONSTANT(true, location); }
-"f"(?i:"alse")  { return yy::CoolParser::make_BOOL_CONSTANT(false, location); }
+"t"(?i:"rue")  { return yy::CoolParser::make_BOOL_CONSTANT(1, location); }
+"f"(?i:"alse")  { return yy::CoolParser::make_BOOL_CONSTANT(0, location); }
 
 
  /* Keywords */
@@ -77,6 +77,7 @@ location.step();
 "case"  { return yy::CoolParser::make_CASE(location); }
 "of"  { return yy::CoolParser::make_OF(location); }
 "esac"  { return yy::CoolParser::make_ESAC(location); }
+"=>"  { return yy::CoolParser::make_CASE_ASSIGN(location); }
 "if"  { return yy::CoolParser::make_IF(location); }
 "then"  { return yy::CoolParser::make_THEN(location); }
 "else"  { return yy::CoolParser::make_ELSE(location); }
@@ -88,9 +89,25 @@ location.step();
 "not"  { return yy::CoolParser::make_NOT(location); }
 
  /* Other operators */
+"<"   { return yy::CoolParser::make_LT_OP(location); }
 "<="  { return yy::CoolParser::make_LTE_OP(location); }
-"=>"  { return yy::CoolParser::make_CASE_ASSIGN(location); }
+"="   { return yy::CoolParser::make_EQUALS(location); }
 "<-"  { return yy::CoolParser::make_ASSIGN(location); }
+"{"   { return yy::CoolParser::make_LBRACE(location); }
+"}"   { return yy::CoolParser::make_RBRACE(location); }
+"("   { return yy::CoolParser::make_LPAREN(location); }
+")"   { return yy::CoolParser::make_RPAREN(location); }
+":"   { return yy::CoolParser::make_COLON(location); }
+";"   { return yy::CoolParser::make_SEMICOLON(location); }
+"+"   { return yy::CoolParser::make_PLUS(location); }
+"-"   { return yy::CoolParser::make_MINUS(location); }
+"*"   { return yy::CoolParser::make_TIMES(location); }
+"/"   { return yy::CoolParser::make_DIVIDE(location); }
+"~"   { return yy::CoolParser::make_TILDE(location); }
+"@"   { return yy::CoolParser::make_AT(location); }
+"."   { return yy::CoolParser::make_PERIOD(location); }
+","   { return yy::CoolParser::make_COMMA(location); }
+
 
  /* Identifiers/Types */
 {IDENTIFIER}  { return yy::CoolParser::make_IDENTIFIER(yytext, location); }
@@ -100,8 +117,11 @@ location.step();
  /*  Skip the blanks */
 [ \t\v\r\f]  { location.step(); }
 
-
-.  { compiler.error(location, "invalid character"); }
+.  {
+	compiler.error(location,
+		std::string("invalid character '").append(yytext).append("'")
+	);
+}
 <<EOF>>  { return yy::CoolParser::make_END(location); }
 %%
 

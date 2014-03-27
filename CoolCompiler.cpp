@@ -1,11 +1,5 @@
 #include "CoolCompiler.h"
 
-CoolCompiler::CoolCompiler(){
-	variables["one"] = 1;
-	variables["two"] = 2;
-}
-CoolCompiler::~CoolCompiler(){}
-
 bool CoolCompiler::compile(const char* filename){
 	if(!parse(filename)){
 		std::cerr << result << std::endl;
@@ -33,16 +27,14 @@ void CoolCompiler::error(const yy::location& location, const std::string& msg){
 		std::cerr << location.begin.line << ":" << location.begin.column;
 		std::cerr << " - ";
 		std::cerr << location.end.line << ":" << location.end.column;
-		std::cerr << std::endl;
 	}else if(location.begin.column < location.end.column - 1){
 		std::cerr << location.begin.line << ":" << location.begin.column;
 		std::cerr << " - ";
 		std::cerr << location.end.column - 1;
-		std::cerr << std::endl;
 	}else{
 		std::cerr << location.begin.line << ":" << location.begin.column;
-		std::cerr << std::endl;
 	}
+	std::cerr << ": " << msg << std::endl;
 }
 void CoolCompiler::error(const std::string& msg){
 	std::cerr << msg << std::endl;

@@ -30,30 +30,35 @@ class CoolCompiler;
 
 // Define Terminals
 %define api.token.prefix {TOK_}
-%token <std::string> IDENTIFIER
-%token <std::string> TYPE
-%token <int> INT_CONSTANT
-%token <std::string> STRING_CONSTANT
-%token <bool> BOOL_CONSTANT
+%token <std::string> IDENTIFIER;
+%token <std::string> TYPE;
+%token <int> INT_CONSTANT;
+%token <std::string> STRING_CONSTANT;
+%token <bool> BOOL_CONSTANT;
 
-%token END 0
-%token CLASS INHERITS NEW SELF
-%token LET IN CASE OF ESAC CASE_ASSIGN "=>"
-%token IF THEN ELSE FI
-%token WHILE LOOP POOL
-%token ISVOID NOT
-%token ASSIGN "<-" LTE_OP "<="
+%token END 0;
+%token CLASS INHERITS NEW SELF;
+%token LET IN CASE OF ESAC CASE_ASSIGN "=>";
+%token IF THEN ELSE FI;
+%token WHILE LOOP POOL;
+%token ISVOID NOT;
+
+%token LBRACE "{" RBRACE "}" LPAREN "(" RPAREN ")";
+%token COLON ":" SEMICOLON ";";
+%token ASSIGN "<-" LT_OP "<" LTE_OP "<=" EQUALS "=";
+%token PLUS "+" MINUS "-" TIMES "*" DIVIDE "/";
+%token TILDE "~" AT "@" PERIOD "." COMMA ",";
 
 // Precedence
-%right "<-"
-%left NOT
-%nonassoc '<' "<=" '='
-%left '+' '-'
-%left '*' '/'
-%left ISVOID
-%left '~'
-%left '@'
-%left '.'
+%right "<-";
+%left NOT;
+%nonassoc "<" "<=" "=";
+%left "+" "-";
+%left "*" "/";
+%left ISVOID;
+%left "~";
+%left "@";
+%left ".";
 
 %start program
 
@@ -67,8 +72,8 @@ program
 
 // Class definitions
 class_definition
-	: class_declaration '{' class_body '}' ';'
-	| '{' class_body '}' ';'
+	: class_declaration "{" class_body "}" ";"
+	| "{" class_body "}" ";"
 	;
 
 class_declaration
@@ -78,8 +83,8 @@ class_declaration
 
 class_body
 	: %empty
-	| class_body attribute ';'
-	| class_body method ';'
+	| class_body attribute ";"
+	| class_body method ";"
 	;
 
 // Class variables/symbols/attributes
@@ -89,35 +94,35 @@ attribute
 	;
 
 symbol_declaration
-	: IDENTIFIER ':' TYPE
+	: IDENTIFIER ":" TYPE
 	;
 
 // Method/function definitions
 method
-	: method_declaration ':' TYPE '{' expression '}'
+	: method_declaration ":" TYPE "{" expression "}"
 	;
 
 method_declaration
-	: IDENTIFIER '(' init_arg_list ')'
-	| IDENTIFIER '(' ')'
+	: IDENTIFIER "(" init_arg_list ")"
+	| IDENTIFIER "(" ")"
 	;
 
 init_arg_list
 	: symbol_declaration
-	| init_arg_list ',' symbol_declaration
+	| init_arg_list "," symbol_declaration
 	;
 
 
 // Expressions
 expression
-	: '(' expression ')'
+	: "(" expression ")"
 	| constants
 	| identifiers
 	| assignment
 	| dispatch
 	| conditional
 	| loop
-	| '{' block '}'
+	| "{" block "}"
 	| let 
 	| cases
 	| NEW TYPE
@@ -143,19 +148,19 @@ assignment
 	;
 
 dispatch
-	: dispatch_id '(' arg_list ')'
-	| dispatch_id '(' ')'
+	: dispatch_id "(" arg_list ")"
+	| dispatch_id "(" ")"
 	;
 
 dispatch_id
-	: expression '.' IDENTIFIER
+	: expression "." IDENTIFIER
 	| IDENTIFIER
-	| expression '@' TYPE '.' IDENTIFIER
+	| expression "@" TYPE "." IDENTIFIER
 	;
 
 arg_list
 	: expression
-	| arg_list ',' expression
+	| arg_list "," expression
 	;
 
 conditional
@@ -168,8 +173,8 @@ loop
 	;
 
 block
-	: expression ';'
-	| block expression ';'
+	: expression ";"
+	| block expression ";"
 	;
 
 let
@@ -178,7 +183,7 @@ let
 
 init_attribute_list
 	: attribute
-	| init_attribute_list ',' attribute
+	| init_attribute_list "," attribute
 	;
 
 cases
@@ -191,21 +196,21 @@ case_branches
 	;
 
 case_branch
-	: symbol_declaration "=>" expression ';'
+	: symbol_declaration "=>" expression ";"
 	;
 
 arithmetic
-	: expression '+' expression
-	| expression '-' expression
-	| expression '*' expression
-	| expression '/' expression
-	| '~' expression
+	: expression "+" expression
+	| expression "-" expression
+	| expression "*" expression
+	| expression "/" expression
+	| "~" expression
 	;
 
 comparison
-	: expression '<' expression
+	: expression "<" expression
 	| expression "<=" expression
-	| expression '=' expression
+	| expression "=" expression
 	| NOT expression
 	;
 %%

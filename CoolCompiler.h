@@ -28,8 +28,8 @@ public:
 	std::string filename;
 	int result;
 	
-	CoolCompiler();
-	virtual ~CoolCompiler();
+	CoolCompiler(){};
+	virtual ~CoolCompiler(){};
 	bool compile(const char*);
 	void lexerBegin();
 	void lexerEnd();
@@ -37,6 +37,5 @@ public:
 	void error(const yy::location&, const std::string&);
 	void error(const std::string&);
 };
-
 
 #endif
