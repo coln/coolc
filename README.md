@@ -25,3 +25,11 @@ I understand hand-writing things are usually not the way to program, however I a
 learning so it's all good. After reading [this overview on Bison's tables](http://www.cs.uic.edu/~spopuri/cparser.html),
 I realized that to keep going on the route I'm traveling down I would have to optimize all these tables
 and pretty much create a mini-Bison. So....nah. I think I got the gist.
+
+Stages of Compilation
+=====================
+- Lexical Analysis
+- Parsing
+- Semantic Analysis
+- Optimization
+- Code Generation

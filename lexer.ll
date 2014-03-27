@@ -52,7 +52,7 @@ location.step();
 
 
  /* Constants */
-{INTEGER}  { return yy::CoolParser::make_INT_CONSTANT(atol(yytext), location); }
+{INTEGER}  { return yy::CoolParser::make_INT_CONSTANT(yytext, location); }
 {STRING_CONSTANT}  {
 	int len = strlen(yytext);
 	if(len > MAX_STRING_LENGTH){
@@ -63,8 +63,8 @@ location.step();
 }
 
  /* Booleans */
-"t"(?i:"rue")  { return yy::CoolParser::make_BOOL_CONSTANT(1, location); }
-"f"(?i:"alse")  { return yy::CoolParser::make_BOOL_CONSTANT(0, location); }
+"t"(?i:"rue")  { return yy::CoolParser::make_BOOL_CONSTANT("true", location); }
+"f"(?i:"alse")  { return yy::CoolParser::make_BOOL_CONSTANT("false", location); }
 
 
  /* Keywords */

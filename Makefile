@@ -13,6 +13,7 @@ BISON_FLAGS = -o $(PARSER_OUT) --defines=$(PARSER_H)
 FLEX_FLAGS = -o $(LEXER_OUT)
 
 SOURCES = Main.cpp CoolCompiler.cpp
+SOURCES += Class.cpp Features.cpp Expression.cpp
 HEADERS = CoolCompiler.h
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = coolc

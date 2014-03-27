@@ -16,11 +16,8 @@ int main(int argc, char* argv[]){
 	getFlags(compiler, argc, argv);
 	
 	// The remaining arguments should be filenames
-	int optionIndex = optind;
-	while(optionIndex < argc){
-		if(!compiler.compile(argv[optionIndex++])){
-			return 1;
-		}
+	if(!compiler.compile(optind, argc, argv)){
+		return 1;
 	}
 	return 0;
 }

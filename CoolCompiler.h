@@ -2,8 +2,8 @@
 #define COOL_COOL_COMPILER_H_
 
 #include <iostream>
-#include <map>
 #include <string>
+#include "Class.h"
 #include "parser.h"
 
 // Tell Flex the lexer's prototype ...
@@ -24,13 +24,13 @@ public:
 						outputFile("") {}
 	} flags;
 	
-	std::map<std::string, int> variables;
+	std::vector<Class*> classes;
 	std::string filename;
 	int result;
 	
 	CoolCompiler(){};
-	virtual ~CoolCompiler(){};
-	bool compile(const char*);
+	virtual ~CoolCompiler();
+	bool compile(int, int, char**);
 	void lexerBegin();
 	void lexerEnd();
 	int parse(const std::string&);

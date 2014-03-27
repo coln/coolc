@@ -8,6 +8,13 @@
 %code requires {
 #define YYERROR_VERBOSE 1
 #include <string>
+#include <vector>
+#include "Class.h"
+#include "Features.h"
+#include "Attribute.h"
+#include "Method.h"
+#include "Symbol.h"
+#include "Expression.h"
 class CoolCompiler;
 }
 
@@ -23,6 +30,7 @@ class CoolCompiler;
 %define parse.error verbose
 
 %code {
+// We include it here because CoolCompiler needs to know about the yy namespace
 #include "CoolCompiler.h"
 }
 
@@ -30,11 +38,16 @@ class CoolCompiler;
 
 // Define Terminals
 %define api.token.prefix {TOK_}
-%token <std::string> IDENTIFIER;
-%token <std::string> TYPE;
-%token <int> INT_CONSTANT;
-%token <std::string> STRING_CONSTANT;
-%token <bool> BOOL_CONSTANT;
+%token <std::string> IDENTIFIER TYPE;
+%token <std::string> INT_CONSTANT BOOL_CONSTANT STRING_CONSTANT;
+
+%type <Class*> class;
+%type <Features*> features;
+%type <Attribute*> attribute;
+%type <Method*> method;
+%type <Symbol*> symbol_declaration;
+%type <std::vector<Symbol*>*> init_arg_list;
+%type <Expression*> expression constants identifiers arithmetic comparison;
 
 %token END 0;
 %token CLASS INHERITS NEW SELF;
@@ -66,59 +79,62 @@ class CoolCompiler;
 %%
 program
 	: %empty
-	| program class_definition
-	| program class_definition error { yyerrok; }
+	| program class
+	| program class error { yyerrok; }
 	;
 
 // Class definitions
-class_definition
-	: class_declaration "{" class_body "}" ";"
-	| "{" class_body "}" ";"
+class
+	: CLASS TYPE "{" features "}" ";"
+		{
+			compiler.classes.push_back(new Class($2, $4));
+		}
+	| CLASS TYPE INHERITS TYPE "{" features "}" ";"
+		{
+			compiler.classes.push_back(new Class($2, $4, $6));
+		}
 	;
 
-class_declaration
-	: CLASS TYPE
-	| CLASS TYPE INHERITS TYPE
-	;
-
-class_body
-	: %empty
-	| class_body attribute ";"
-	| class_body method ";"
+features
+	: %empty { $$ = new Features; }
+	| features attribute ";" { $1->addAttribute($2); $$ = $1; }
+	| features method ";" { $1->addMethod($2); $$ = $1; }
 	;
 
 // Class variables/symbols/attributes
 attribute
-	: symbol_declaration
-	| symbol_declaration "<-" expression
+	: symbol_declaration { $$ = new Attribute($1); }
+	| symbol_declaration "<-" expression { $$ = new Attribute($1, $3); }
 	;
 
 symbol_declaration
-	: IDENTIFIER ":" TYPE
+	: IDENTIFIER ":" TYPE { $$ = new Symbol($1, $3); }
 	;
 
 // Method/function definitions
 method
-	: method_declaration ":" TYPE "{" expression "}"
-	;
-
-method_declaration
-	: IDENTIFIER "(" init_arg_list ")"
-	| IDENTIFIER "(" ")"
+	: IDENTIFIER "(" ")" ":" TYPE "{" expression "}"
+		{
+			$$ = new Method($1, $5, $7);
+		}
+	| IDENTIFIER "(" init_arg_list ")" ":" TYPE "{" expression "}"
+		{
+			$$ = new Method($1, $6, $3, $8);
+		}
 	;
 
 init_arg_list
-	: symbol_declaration
-	| init_arg_list "," symbol_declaration
+	: symbol_declaration { $$ = new std::vector<Symbol*>; $$->push_back($1); }
+	| init_arg_list "," symbol_declaration { $1->push_back($3); }
 	;
 
 
 // Expressions
 expression
-	: "(" expression ")"
+	: "(" expression ")" { $$ = $2; }
 	| constants
 	| identifiers
-	| assignment
+	/*| assignment
 	| dispatch
 	| conditional
 	| loop
@@ -126,23 +142,23 @@ expression
 	| let 
 	| cases
 	| NEW TYPE
-	| ISVOID expression
+	| ISVOID expression*/
 	| arithmetic
 	| comparison
 	;
 
 
 constants
-	: BOOL_CONSTANT
-	| INT_CONSTANT
-	| STRING_CONSTANT
+	: INT_CONSTANT { $$ = new Expression($1, ExpType::INT); }
+	| BOOL_CONSTANT { $$ = new Expression($1, ExpType::BOOL); }
+	| STRING_CONSTANT { $$ = new Expression($1, ExpType::STRING); }
 	;
 
 identifiers
-	: IDENTIFIER
-	| SELF
+	: IDENTIFIER { $$ = new Expression($1, ExpType::IDENTIFIER); }
+	| SELF { $$ = new Expression("self", ExpType::SELF); }
 	;
-
+/*
 assignment
 	: IDENTIFIER ASSIGN expression
 	;
@@ -198,20 +214,20 @@ case_branches
 case_branch
 	: symbol_declaration "=>" expression ";"
 	;
-
+*/
 arithmetic
-	: expression "+" expression
-	| expression "-" expression
-	| expression "*" expression
-	| expression "/" expression
-	| "~" expression
+	: expression "+" expression { $$ = new Expression($1, "+", $3); }
+	| expression "-" expression { $$ = new Expression($1, "-", $3); }
+	| expression "*" expression { $$ = new Expression($1, "*", $3); }
+	| expression "/" expression { $$ = new Expression($1, "/", $3); }
+	| "~" expression { $$ = new Expression($2, "~", NULL); }
 	;
 
 comparison
-	: expression "<" expression
-	| expression "<=" expression
-	| expression "=" expression
-	| NOT expression
+	: expression "<" expression { $$ = new Expression($1, "<", $3); }
+	| expression "<=" expression { $$ = new Expression($1, "<=", $3); }
+	| expression "=" expression { $$ = new Expression($1, "=", $3); }
+	| NOT expression { $$ = new Expression($2, "not", NULL); }
 	;
 %%
 
