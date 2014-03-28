@@ -16,9 +16,15 @@
 #include "Symbol.h"
 #include "Expression.h"
 class CoolCompiler;
+class Class;
+class Features;
+class Attribute;
+class Method;
+class Symbol;
+class Expression;
 }
 
-// The parsing context.
+// The parsing context
 %param { CoolCompiler& compiler }
 %locations
 %initial-action {
@@ -95,8 +101,9 @@ class
 		}
 	;
 
+// Will this work?
 features
-	: %empty { $$ = new Features; }
+	: %empty { $$ = new Features(); }
 	| features attribute ";" { $1->addAttribute($2); $$ = $1; }
 	| features method ";" { $1->addMethod($2); $$ = $1; }
 	;
@@ -149,14 +156,14 @@ expression
 
 
 constants
-	: INT_CONSTANT { $$ = new Expression($1, ExpType::INT); }
-	| BOOL_CONSTANT { $$ = new Expression($1, ExpType::BOOL); }
-	| STRING_CONSTANT { $$ = new Expression($1, ExpType::STRING); }
+	: INT_CONSTANT { $$ = new Expression($1, "Int"); }
+	| BOOL_CONSTANT { $$ = new Expression($1, "Bool"); }
+	| STRING_CONSTANT { $$ = new Expression($1, "String"); }
 	;
 
 identifiers
-	: IDENTIFIER { $$ = new Expression($1, ExpType::IDENTIFIER); }
-	| SELF { $$ = new Expression("self", ExpType::SELF); }
+	: IDENTIFIER { $$ = new Expression($1); }
+	| SELF { $$ = new Expression("self"); }
 	;
 /*
 assignment

@@ -1,6 +1,9 @@
 #ifndef COOL_FEATURES_H_
 #define COOL_FEATURES_H_
 
+class Attribute;
+class Method;
+
 #include <vector>
 #include "Attribute.h"
 #include "Method.h"

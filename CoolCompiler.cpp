@@ -16,21 +16,39 @@ bool CoolCompiler::compile(int optind, int argc, char* argv[]){
 	while(optionIndex < argc){
 		filename = argv[optionIndex];
 		if(parse(argv[optionIndex++])){
-			std::cerr << "coolc: error " << result;
-			std::cerr << " in parsing \"" << filename;
-			std::cerr << "\"" << std::endl;
+			error(std::string("error in parsing \"").append(filename).append("\""));
 			return false;
 		}
 	}
 	
+	/*
+	First make sure a class called Main with a method called main exists
+	Then run the type checker for every class
+	Then evaluate every class
+	*/
+	
 	// Awesome socks
 	// Now let's perform semantic analysis, optimization, and code gen
-	int numClasses = classes.size();
-	std::cout << "Total classes created: " << numClasses << std::endl;
+	if(flags.traceAnalyzer || flags.verbose){
+		int numClasses = classes.size();
+		std::cout << "Total classes created: " << numClasses << std::endl;
+	}
 	
+	// Make sure class Main is found
+	bool mainFound = false;
 	int i;
 	for(i = 0; i < numClasses; i++){
-		classes[i]->evaluateFeatures();
+		if(classes[i].name == "Main"){
+			mainFound = true;
+		}
+	}
+	if(!mainFound){
+		error("class \"Main\" not found");
+		return false;
+	}
+	
+	for(i = 0; i < numClasses; i++){
+		classes[i]->evaluate();
 	}
 	return true;
 }

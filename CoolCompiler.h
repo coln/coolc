@@ -1,6 +1,7 @@
 #ifndef COOL_COOL_COMPILER_H_
 #define COOL_COOL_COMPILER_H_
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include "Class.h"
@@ -18,9 +19,10 @@ public:
 		bool verbose;
 		bool traceLexer;
 		bool traceParser;
+		bool traceAnalyzer;
 		std::string outputFile;
 		Flags() : verbose(false),
-						traceLexer(false), traceParser(false),
+						traceLexer(false), traceParser(false), traceAnalyzer(false),
 						outputFile("") {}
 	} flags;
 	

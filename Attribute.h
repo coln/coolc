@@ -1,6 +1,9 @@
 #ifndef COOL_ATTRIBUTE_H_
 #define COOL_ATTRIBUTE_H_
 
+class Symbol;
+class Expression;
+
 #include "Symbol.h"
 #include "Expression.h"
 
@@ -9,11 +12,9 @@ public:
 	Symbol *symbol;
 	Expression *expression;
 	
-	Attribute(){}
-	Attribute(Symbol *symbol)
-		: symbol(symbol){}
-	Attribute(Symbol *symbol, Expression *expression)
-		: symbol(symbol), expression(expression){}
+	Attribute();
+	Attribute(Symbol *symbol);
+	Attribute(Symbol *symbol, Expression *expression);
 };
 
 #endif

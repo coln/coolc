@@ -24,7 +24,6 @@ int main(int argc, char* argv[]){
 
 void printUsage(){
 	std::cout << "Usage: coolc [-vplto] file ...\n"
-			 "\n"
 			 "   Options\n"
 			 "       -v, --verbose\n"
 			 "           Show lexer and parser output and traces.\n"
@@ -35,6 +34,9 @@ void printUsage(){
 			 "\n"
 			 "       -p, --parser\n"
 			 "           Show parser output and traces\n"
+			 "\n"
+			 "       -a, --analyzer\n"
+			 "           Show semantic analyzer output and traces\n"
 			 "\n"
 			 "       -o, --output=FILE\n"
 			 "           Specify a file FILE to name the output executable\n"
@@ -49,11 +51,12 @@ void getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 			{"verbose", no_argument, 0, 'v'},
 			{"lexer", no_argument, 0, 'l'},
 			{"parser", no_argument, 0, 'p'},
+			{"analyzer", no_argument, 0, 'a'},
 			{"output", required_argument, 0, 'o'}
 		};
 		// getopt_long stores the option index here
 		int option_index = 0;
-		flag = getopt_long(argc, argv, "vlpo:", long_options, &option_index);
+		flag = getopt_long(argc, argv, "vlpao:", long_options, &option_index);
 		switch(flag){
 			case 'v':
 				compiler.flags.verbose = true;
@@ -62,6 +65,9 @@ void getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 				compiler.flags.traceLexer = true;
 				break;
 			case 'p':
+				compiler.flags.traceParser = true;
+				break;
+			case 'a':
 				compiler.flags.traceParser = true;
 				break;
 			case 'o':
