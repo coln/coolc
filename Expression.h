@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <string>
-#include "StringTable.h"
 #include "parser.h"
 
 class Expression {

@@ -29,8 +29,8 @@ bool CoolCompiler::compile(int optind, int argc, char* argv[]){
 	
 	// Awesome socks
 	// Now let's perform semantic analysis, optimization, and code gen
+	int numClasses = classes.size();
 	if(flags.traceAnalyzer || flags.verbose){
-		int numClasses = classes.size();
 		std::cout << "Total classes created: " << numClasses << std::endl;
 	}
 	
@@ -38,7 +38,7 @@ bool CoolCompiler::compile(int optind, int argc, char* argv[]){
 	bool mainFound = false;
 	int i;
 	for(i = 0; i < numClasses; i++){
-		if(classes[i].name == "Main"){
+		if(classes[i]->name == "Main"){
 			mainFound = true;
 		}
 	}
@@ -47,6 +47,7 @@ bool CoolCompiler::compile(int optind, int argc, char* argv[]){
 		return false;
 	}
 	
+	// Evaluate the classes
 	for(i = 0; i < numClasses; i++){
 		classes[i]->evaluate();
 	}

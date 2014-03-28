@@ -68,7 +68,7 @@ void getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 				compiler.flags.traceParser = true;
 				break;
 			case 'a':
-				compiler.flags.traceParser = true;
+				compiler.flags.traceAnalyzer = true;
 				break;
 			case 'o':
 				compiler.flags.outputFile = optarg;

@@ -1,12 +1,7 @@
 #ifndef COOL_SYMBOL_H_
 #define COOL_SYMBOL_H_
 
-class StringTable;
-class Expression;
-
 #include <string>
-#include "StringTable.h"
-#include "Expression.h"
 
 class Symbol {
 public:
