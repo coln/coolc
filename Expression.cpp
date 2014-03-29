@@ -1,15 +1,35 @@
 #include "Expression.h"
 
+#include <iostream>
 Expression::Expression(){}
-Expression::Expression(std::string identifier){
-	symbol = new Symbol(identifier, "");
+Expression::Expression(std::string identifier)
+	: symbol(new Symbol(identifier, "")), lhs(NULL), op(NULL), rhs(NULL)
+{
 }
-Expression::Expression(std::string identifier, std::string type){
-	symbol = new Symbol(identifier, type);
+Expression::Expression(std::string identifier, std::string type)
+	: symbol(new Symbol(identifier, type)), lhs(NULL), op(""), rhs(NULL)
+{
 }
 Expression::Expression(Expression *lhs, std::string op, Expression *rhs)
-	: lhs(lhs), op(op), rhs(rhs)
-{	
+	: symbol(NULL), lhs(lhs), op(op), rhs(rhs)
+{
+}
+
+Expression::Expression(const Expression& e)
+	: symbol(e.symbol), lhs(e.lhs), op(e.op), rhs(e.rhs)
+{
+}
+Expression& Expression::operator=(Expression e){
+	std::swap(this->symbol, e.symbol);
+	std::swap(this->lhs, e.lhs);
+	std::swap(this->rhs, e.rhs);
+	return *this;
+}
+
+Expression::~Expression(){
+	delete symbol;
+	delete lhs;
+	delete rhs;
 }
 
 
@@ -54,26 +74,4 @@ void Expression::evaluate(){
 		type = ExpType::BOOL;
 		return;
 	}*/
-}
-
-/* itoa:  convert n to characters in s */
-std::string Expression::itoa(int n){
-	int sign;
-	std::string str;
-
-	if((sign = n) < 0){  /* record sign */
-		n = -n;          /* make n positive */
-	}
-	
-	char c[2];
-	do {       /* generate digits in reverse order */
-		c[0] = n % 10 + '0';
-		c[1] = '\0';
-		str.insert(0, c);   /* get next digit */
-	} while ((n /= 10) > 0);     /* delete it */
-	
-	if(sign < 0){
-		str.insert(0, "-");
-	}
-	return str;
 }

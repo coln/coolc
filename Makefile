@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall
+CXXFLAGS = -Wall -g
 CXXLIBS = -lfl
 RM = rm -rf
 
@@ -13,8 +13,11 @@ BISON_FLAGS = -o $(PARSER_OUT) --defines=$(PARSER_H)
 FLEX_FLAGS = -o $(LEXER_OUT)
 
 SOURCES = Main.cpp CoolCompiler.cpp
+SOURCES += TypeTable.cpp
 SOURCES += Class.cpp Features.cpp Attribute.cpp Symbol.cpp Method.cpp Expression.cpp
-HEADERS = CoolCompiler.h Class.h Features.h Attribute.h Symbol.h Method.h Expression.h
+HEADERS = CoolCompiler.h
+HEADERS += TypeTable.h
+HEADERS += Class.h Features.h Attribute.h Symbol.h Method.h Expression.h
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = coolc
 

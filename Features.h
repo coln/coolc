@@ -4,6 +4,7 @@
 class Attribute;
 class Method;
 
+#include <algorithm>
 #include <vector>
 #include "Attribute.h"
 #include "Method.h"
@@ -13,7 +14,8 @@ public:
 	std::vector<Attribute*> attributes;
 	std::vector<Method*> methods;
 	
-	Features(){}
+	Features();
+	~Features();
 	
 	void addAttribute(Attribute*);
 	void addMethod(Method*);

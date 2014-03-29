@@ -1,8 +1,9 @@
 #ifndef COOL_EXPRESSION_H_
 #define COOL_EXPRESSION_H_
 
-#include <cstdlib>
+#include <algorithm>
 #include <string>
+#include "Symbol.h"
 #include "parser.h"
 
 class Expression {
@@ -17,9 +18,11 @@ public:
 	Expression(std::string);
 	Expression(std::string, std::string);
 	Expression(Expression*, std::string, Expression*);
+	Expression(const Expression&);
+	Expression& operator=(Expression);
+	~Expression();
 	
 	void evaluate();
-	std::string itoa(int);
 };
 
 #endif

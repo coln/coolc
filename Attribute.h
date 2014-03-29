@@ -4,6 +4,7 @@
 class Symbol;
 class Expression;
 
+#include <algorithm>
 #include "Symbol.h"
 #include "Expression.h"
 
@@ -15,6 +16,9 @@ public:
 	Attribute();
 	Attribute(Symbol *symbol);
 	Attribute(Symbol *symbol, Expression *expression);
+	Attribute(const Attribute&);
+	Attribute& operator=(Attribute);
+	~Attribute();
 };
 
 #endif

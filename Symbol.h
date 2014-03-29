@@ -8,7 +8,6 @@ public:
 	std::string name;
 	std::string type;
 	
-	Symbol();
 	Symbol(std::string, std::string);
 };
 

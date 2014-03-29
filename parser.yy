@@ -9,12 +9,8 @@
 #define YYERROR_VERBOSE 1
 #include <string>
 #include <vector>
-#include "Class.h"
-#include "Features.h"
-#include "Attribute.h"
-#include "Method.h"
-#include "Symbol.h"
-#include "Expression.h"
+#include "TypeTable.h"
+class TypeTable;
 class CoolCompiler;
 class Class;
 class Features;
@@ -38,6 +34,18 @@ class Expression;
 %code {
 // We include it here because CoolCompiler needs to know about the yy namespace
 #include "CoolCompiler.h"
+#include "Class.h"
+#include "Features.h"
+#include "Attribute.h"
+#include "Method.h"
+#include "Symbol.h"
+#include "Expression.h"
+
+// This allows for the std::vector<Symbol*> type below with the %printer
+std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
+  return os;
+}
+
 }
 
 %printer { yyoutput << $$; } <*>;
@@ -52,7 +60,7 @@ class Expression;
 %type <Attribute*> attribute;
 %type <Method*> method;
 %type <Symbol*> symbol_declaration;
-%type <std::vector<Symbol*>*> init_arg_list;
+%type <std::vector<Symbol*>> init_arg_list;
 %type <Expression*> expression constants identifiers arithmetic comparison;
 
 %token END 0;
@@ -93,15 +101,14 @@ program
 class
 	: CLASS TYPE "{" features "}" ";"
 		{
-			compiler.classes.push_back(new Class($2, $4));
+			compiler.classes.push_back(new Class(@$, $2, $4));
 		}
 	| CLASS TYPE INHERITS TYPE "{" features "}" ";"
 		{
-			compiler.classes.push_back(new Class($2, $4, $6));
+			compiler.classes.push_back(new Class(@$, $2, $4, $6));
 		}
 	;
 
-// Will this work?
 features
 	: %empty { $$ = new Features(); }
 	| features attribute ";" { $1->addAttribute($2); $$ = $1; }
@@ -131,16 +138,16 @@ method
 	;
 
 init_arg_list
-	: symbol_declaration { $$ = new std::vector<Symbol*>; $$->push_back($1); }
-	| init_arg_list "," symbol_declaration { $1->push_back($3); }
+	: symbol_declaration { $$.push_back($1); }
+	| init_arg_list "," symbol_declaration { $1.push_back($3); }
 	;
 
 
 // Expressions
 expression
 	: "(" expression ")" { $$ = $2; }
-	| constants
-	| identifiers
+	| constants { $$ = $1; }
+	| identifiers { $$ = $1; }
 	/*| assignment
 	| dispatch
 	| conditional
@@ -150,8 +157,8 @@ expression
 	| cases
 	| NEW TYPE
 	| ISVOID expression*/
-	| arithmetic
-	| comparison
+	| arithmetic { $$ = $1; }
+	| comparison { $$ = $1; }
 	;
 
 

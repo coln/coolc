@@ -9,3 +9,17 @@ Attribute::Attribute(Symbol *symbol, Expression *expression)
 	: symbol(symbol), expression(expression)
 {
 }
+Attribute::Attribute(const Attribute& a)
+	: symbol(a.symbol), expression(a.expression)
+{
+}
+Attribute& Attribute::operator=(Attribute a){
+	std::swap(this->symbol, a.symbol); 
+	std::swap(this->expression, a.expression);
+	return *this;
+}
+
+Attribute::~Attribute(){
+	delete symbol;
+	delete expression;
+}
