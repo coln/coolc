@@ -118,9 +118,8 @@ location.step();
 [ \t\v\r\f]  { location.step(); }
 
 .  {
-	compiler.error(location,
-		std::string("invalid character '").append(yytext).append("'")
-	);
+	compiler.errorStream << "invalid character '" << yytext << "'";
+	compiler.error(location);
 }
 <<EOF>>  { return yy::CoolParser::make_END(location); }
 %%
@@ -128,13 +127,15 @@ location.step();
 void CoolCompiler::lexerBegin(){
 	yy_flex_debug = flags.verbose || flags.traceLexer;
 	if(filename.empty() || filename == "-"){
-		error("no input files");
+		errorStream << "no input files";
+		error();
 		exit(EXIT_FAILURE);
 	}
 	
 	yyin = fopen(filename.c_str(), "r");
 	if(yyin == NULL){
-		error("cannot open " + filename + ": " + strerror(errno));
+		errorStream << "cannot open " << filename << ": " << strerror(errno);
+		error();
 		exit(EXIT_FAILURE);
 	}
 }

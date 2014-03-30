@@ -12,15 +12,15 @@ class Expression;
 
 class Class {
 public:
-	const yy::location location;
+	yy::location location;
 	std::string name;
 	std::string inherits;
 	int nameIndex;
 	int inheritsIndex;
 	Features *features;
 	
-	Class(const yy::location, std::string, Features*);
-	Class(const yy::location, std::string, std::string, Features*);
+	Class(std::string, Features*);
+	Class(std::string, std::string, Features*);
 	~Class();
 	
 	void checkTypes();

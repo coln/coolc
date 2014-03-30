@@ -1,20 +1,77 @@
 #include "CoolCompiler.h"
 
+CoolCompiler::CoolCompiler()
+	: errorFlag(false)
+{
+	typeTable.add("Int");
+	typeTable.add("Bool");
+	typeTable.add("String");
+}
+
 CoolCompiler::~CoolCompiler(){
 	// Kill all classes and its children
+	// This way, I can create new temp pointer and not worry about having
+	// everything destruct when I want to delete the temp
 	std::vector<Class*>::iterator it;
 	for(it = classes.begin(); it < classes.end(); ++it){
-		delete *it;
+		destructClass(*it);
 	}
 }
+void CoolCompiler::destructClass(Class* &thisClass){
+	destructFeatures(thisClass->features);
+	delete thisClass;
+}
+void CoolCompiler::destructFeatures(Features* &features){
+	std::vector<Attribute*>::iterator it;
+	for(it = features->attributes.begin(); it != features->attributes.end(); ++it){
+		destructAttribute(*it);
+	}
+	std::vector<Method*>::iterator it2;
+	for(it2 = features->methods.begin(); it2 != features->methods.end(); ++it2){
+		destructMethod(*it2);
+	}
+	features->attributes.clear();
+	features->methods.clear();
+	delete features;
+}
+void CoolCompiler::destructAttribute(Attribute* &attribute){
+	destructSymbol(attribute->symbol);
+	destructExpression(attribute->expression);
+	delete attribute;
+}
+void CoolCompiler::destructSymbol(Symbol* &symbol){
+	delete symbol;
+}
+void CoolCompiler::destructMethod(Method* &method){
+	destructSymbol(method->symbol);
+	destructExpression(method->expression);
+	std::vector<Symbol*>::iterator it;
+	for(it = method->arguments.begin(); it != method->arguments.end(); ++it){
+		destructSymbol(*it);
+	}
+	method->arguments.clear();
+	delete method;
+}
+void CoolCompiler::destructExpression(Expression* &expression){
+	destructSymbol(expression->symbol);
+	if(expression->lhs){
+		destructExpression(expression->lhs);
+	}
+	if(expression->rhs){
+		destructExpression(expression->rhs);
+	}
+	delete expression;
+}
+
+
 bool CoolCompiler::compile(int optind, int argc, char* argv[]){
 	// Lex/Parse each input file
 	int optionIndex = optind;
 	while(optionIndex < argc){
 		filename = argv[optionIndex];
 		if(parse(argv[optionIndex++])){
-			std::string msg = "error in parsing \"" + filename + "\"";
-			error(msg);
+			errorStream << "error in parsing \"" << filename << "\"";
+			error();
 			return false;
 		}
 	}
@@ -39,21 +96,22 @@ int CoolCompiler::parse(const std::string& filename){
 }
 
 bool CoolCompiler::analyze(){
-	std::string msg;
-	traceAnalyzer("Enterting Semantic Analysis phase...");
+	traceStream << "Entering Semantic Analysis phase...";
+	traceAnalyzer();
 	
 	// Make sure class Main is found
 	bool mainFound = false;
-	int numClasses = classes.size();
-	int i;
+	std::vector<Class*>::iterator classIt;
+	
 	
 	// Add class names to typeTable, check for class Main
 	Class *thisClass;
-	for(i = 0; i < numClasses; i++){
-		thisClass = classes[i];
+	for(classIt = classes.begin(); classIt != classes.end(); ++classIt){
+		thisClass = *classIt;
 		if(typeTable.find(thisClass->name) != -1){
-			msg = "the class \"" + thisClass->name + "\" has already been defined";
-			error(thisClass->location, msg);
+			errorStream << "the class \"" << thisClass->name;
+			errorStream << "\" has already been defined";
+			error(thisClass->location);
 		}
 		thisClass->nameIndex = typeTable.add(thisClass->name, true);
 		if(thisClass->name == "Main"){
@@ -64,70 +122,141 @@ bool CoolCompiler::analyze(){
 		error("class \"Main\" not found");
 		return false;
 	}
+	traceStream << "Total classes created: " << classes.size();
+	traceAnalyzer();
 	
-	traceAnalyzer("Total classes created: %d", numClasses);
 	
-	// Check the inheritance exists
-	for(i = 0; i < numClasses; i++){
+	// UM YEA so this can be reduced
+	// Aka pass this off to a type checker class
+	for(classIt = classes.begin(); classIt != classes.end(); ++classIt){
+		thisClass = *classIt;
+		
 		// Analyze the classes
-		thisClass = classes[i];
 		if(!thisClass->inherits.empty()){
 			thisClass->inheritsIndex = typeTable.find(thisClass->inherits);
 		}
 		if(thisClass->inheritsIndex == -1){
-			msg = "error inheriting \"" + thisClass->inherits;
-			msg += "\": no such class";
-			error(thisClass->location, msg);
+			errorStream << "error inheriting \"" << thisClass->inherits;
+			errorStream << "\": no such class exists";
+			error(thisClass->location);
 		}
+		
+		// Analyze the attributes
+		Features *features = thisClass->features;
+		Features *tempFeatures = new Features();
+		tempFeatures->location = features->location;
+		
+		
+		std::vector<Attribute*> &attributes = features->attributes;
+		std::vector<Attribute*>::iterator it;
+		Attribute *thisAttr;
+		for(it = attributes.begin(); it != attributes.end(); ++it){
+			thisAttr = *it;
+			// Check for duplicates
+			if(tempFeatures->findAttribute(thisAttr->symbol->name)){
+				errorStream << "an attribute with the name \"" << thisAttr->symbol->name;
+				errorStream << "\" already exists";
+				error(thisAttr->location);
+			}
+			tempFeatures->addAttribute(thisAttr);
+			
+			// Check the type exists
+			if(typeTable.find(thisAttr->symbol->type) == -1){
+				errorStream << "no such type \"" << thisAttr->symbol->type << "\" exists";
+				error(thisAttr->location);
+			}
+			traceStream << "All class attributes of class \"";
+			traceStream << thisClass->name << "\"";
+			traceStream << " have been type checked.";
+			traceAnalyzer();
+		}
+		
+		std::vector<Method*> &methods = features->methods;
+		std::vector<Method*>::iterator it2;
+		Method *thisMethod;
+		for(it2 = methods.begin(); it2 != methods.end(); ++it){
+			thisMethod = *it2;
+			// Check for duplicates
+			if(tempFeatures->findMethod(thisMethod->symbol->name)){
+				errorStream << "a method with the name \"" << thisMethod->symbol->name;
+				errorStream << "\" already exists";
+				error(thisMethod->location);
+			}
+			tempFeatures->addMethod(thisMethod);
+			
+			// Check the type exists
+			if(typeTable.find(thisMethod->symbol->type) == -1){
+				errorStream << "no such type \"" << thisAttr->symbol->type << "\" exists";
+				error(thisMethod->location);
+			}
+			
+			std::vector<Symbol*> &arguments = thisMethod->arguments;
+			std::vector<Symbol*>::iterator it3;
+			Symbol* thisArg;
+			for(it3 = arguments.begin(); it3 != arguments.end(); ++it3){
+				thisArg = *it3;
+				// Check the type exists
+				if(typeTable.find(thisArg->type) == -1){
+					errorStream << "no such type \"" << thisArg->type << "\" exists";
+					error(thisArg->location);
+				}
+			}
+		}
+		traceStream << "All class methods of class \"";
+		traceStream << thisClass->name << "\"";
+		traceStream << " have been type checked.";
+		traceAnalyzer();
+		delete tempFeatures;
 	}
 	
-	// Check the attributes
-	for(i = 0; i < numClasses; i++){
-		// Analyze the attributes
-		thisClass = classes[i];
-		Features *features = thisClass->features;
-		std::vector<Attribute*> &attributes = features->attributes;
-		int numAttributes = attributes.size();
-		int j;
-		for(j = 0; j < numAttributes; j++){
-			// Check for duplicates of the attribute
-			// Then add the attributes to a class list or something
-		}
-	}
+	// Code gen
+	// if errorFlag... halt
 	return true;
 }
 
 // Create an error class to handle all of this?
 // Like an error stream?
-void CoolCompiler::traceAnalyzer(const char *msg, ...){
+void CoolCompiler::traceAnalyzer(){
 	if(flags.traceAnalyzer || flags.verbose){
-		static char errmsg[10000];
-		va_list args;
-		va_start(args, msg);
-		vsprintf(errmsg, msg, args);
-		va_end(args);
-		std::cout << errmsg << std::endl;
+		std::cout << traceStream.str() << std::endl;
 	}
+	traceStream.str(std::string());
+	traceStream.clear();
 }
 
 
-void CoolCompiler::error(const yy::location& location, const std::string& msg){
+void CoolCompiler::error(const yy::location& location){
 	// Because line.column format is just too good for me...
-	std::cerr << filename + ":";
+	std::stringstream newStream;
+	newStream << "\b"; // To get rid of the space in error()
+	
 	if(location.begin.line != location.end.line){
-		std::cerr << location.begin.line << ":" << location.begin.column;
-		std::cerr << " - ";
-		std::cerr << location.end.line << ":" << location.end.column;
+		newStream << location.begin.line << ":" << location.begin.column;
+		newStream << " - ";
+		newStream << location.end.line << ":" << location.end.column;
 	}else if(location.begin.column < location.end.column - 1){
-		std::cerr << location.begin.line << ":" << location.begin.column;
-		std::cerr << " - ";
-		std::cerr << location.end.column - 1;
+		newStream << location.begin.line << ":" << location.begin.column;
+		newStream << " - ";
+		newStream << location.end.column - 1;
 	}else{
-		std::cerr << location.begin.line << ":" << location.begin.column;
+		newStream << location.begin.line << ":" << location.begin.column;
 	}
-	std::cerr << ": " + msg << std::endl;
+	newStream << ": ";
+	newStream << errorStream.str();
+	
+	errorStream.str(std::string());
+	errorStream.clear();
+	errorStream << newStream.str();
+	error();
 }
 void CoolCompiler::error(const std::string& msg){
+	errorStream << msg;
+	error();
+}
+void CoolCompiler::error(){
+	errorFlag = true;
 	std::cerr << filename << ": ";
-	std::cerr << msg << std::endl;
+	std::cerr << errorStream.str() << std::endl;
+	errorStream.str(std::string());
+	errorStream.clear();
 }

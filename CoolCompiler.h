@@ -3,8 +3,6 @@
 
 class TypeTable;
 
-#include <cstdlib>
-#include <cstdarg>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -34,19 +32,31 @@ public:
 	TypeTable typeTable;
 	std::vector<Class*> classes;
 	std::string filename;
+	bool errorFlag;
 	int result;
 	
-	CoolCompiler(){};
+	CoolCompiler();
 	virtual ~CoolCompiler();
+	void destructClass(Class*&);
+	void destructFeatures(Features*&);
+	void destructAttribute(Attribute*&);
+	void destructSymbol(Symbol*&);
+	void destructMethod(Method*&);
+	void destructExpression(Expression*&);
+	
 	bool compile(int, int, char**);
 	void lexerBegin();
 	void lexerEnd();
 	int parse(const std::string&);
 	bool analyze();
 	
-	void traceAnalyzer(const char*, ...);
-	void error(const yy::location&, const std::string&);
+	std::stringstream traceStream;
+	void traceAnalyzer();
+	
+	std::stringstream errorStream;
+	void error(const yy::location&);
 	void error(const std::string&);
+	void error();
 };
 
 #endif

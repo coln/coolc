@@ -26,11 +26,7 @@ Expression& Expression::operator=(Expression e){
 	return *this;
 }
 
-Expression::~Expression(){
-	delete symbol;
-	delete lhs;
-	delete rhs;
-}
+Expression::~Expression(){}
 
 
 void Expression::evaluate(){

@@ -7,9 +7,11 @@ class Expression;
 #include <algorithm>
 #include "Symbol.h"
 #include "Expression.h"
+#include "parser.h"
 
 class Attribute {
 public:
+	yy::location location;
 	Symbol *symbol;
 	Expression *expression;
 	

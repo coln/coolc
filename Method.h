@@ -14,9 +14,9 @@ class Expression;
 
 class Method {
 public:
+	yy::location location;
 	Symbol* symbol;
 	std::vector<Symbol*> arguments;
-	std::vector<Attribute*> attributes;
 	Expression *expression;
 	
 	Method();

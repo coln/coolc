@@ -8,6 +8,7 @@
 
 class Expression {
 public:
+	yy::location location;
 	Symbol *symbol;
 	
 	Expression *lhs;

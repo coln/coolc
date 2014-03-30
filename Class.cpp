@@ -1,17 +1,14 @@
 #include "Class.h"
 
-Class::Class(const yy::location location, std::string name, Features *features)
-	: location(location), name(name), features(features)
+Class::Class(std::string name, Features *features)
+	: name(name), features(features)
 {
 }
-Class::Class(const yy::location location, std::string name, std::string inherits, Features *features)
-	: location(location), name(name), inherits(inherits), features(features)
+Class::Class(std::string name, std::string inherits, Features *features)
+	: name(name), inherits(inherits), features(features)
 {
 }
-
-Class::~Class(){
-	delete features;
-}
+Class::~Class(){}
 
 void Class::checkTypes(){
 	/*

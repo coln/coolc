@@ -43,7 +43,8 @@ class Expression;
 
 // This allows for the std::vector<Symbol*> type below with the %printer
 std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
-  return os;
+	os << "std::vecotr<Symbol*>";
+	return os;
 }
 
 }
@@ -101,28 +102,30 @@ program
 class
 	: CLASS TYPE "{" features "}" ";"
 		{
-			compiler.classes.push_back(new Class(@$, $2, $4));
+			compiler.classes.push_back(new Class($2, $4));
+			compiler.classes.back()->location = @$;
 		}
 	| CLASS TYPE INHERITS TYPE "{" features "}" ";"
 		{
-			compiler.classes.push_back(new Class(@$, $2, $4, $6));
+			compiler.classes.push_back(new Class($2, $4, $6));
+			compiler.classes.back()->location = @$;
 		}
 	;
 
 features
-	: %empty { $$ = new Features(); }
+	: %empty { $$ = new Features(); $$->location = @$;  }
 	| features attribute ";" { $1->addAttribute($2); $$ = $1; }
 	| features method ";" { $1->addMethod($2); $$ = $1; }
 	;
 
 // Class variables/symbols/attributes
 attribute
-	: symbol_declaration { $$ = new Attribute($1); }
-	| symbol_declaration "<-" expression { $$ = new Attribute($1, $3); }
+	: symbol_declaration { $$ = new Attribute($1); $$->location = @$; }
+	| symbol_declaration "<-" expression { $$ = new Attribute($1, $3); $$->location = @$; }
 	;
 
 symbol_declaration
-	: IDENTIFIER ":" TYPE { $$ = new Symbol($1, $3); }
+	: IDENTIFIER ":" TYPE { $$ = new Symbol($1, $3); $$->location = @$; }
 	;
 
 // Method/function definitions
@@ -130,10 +133,12 @@ method
 	: IDENTIFIER "(" ")" ":" TYPE "{" expression "}"
 		{
 			$$ = new Method($1, $5, $7);
+			$$->location = @$;
 		}
 	| IDENTIFIER "(" init_arg_list ")" ":" TYPE "{" expression "}"
 		{
 			$$ = new Method($1, $6, $3, $8);
+			$$->location = @$;
 		}
 	;
 
@@ -163,14 +168,14 @@ expression
 
 
 constants
-	: INT_CONSTANT { $$ = new Expression($1, "Int"); }
-	| BOOL_CONSTANT { $$ = new Expression($1, "Bool"); }
-	| STRING_CONSTANT { $$ = new Expression($1, "String"); }
+	: INT_CONSTANT { $$ = new Expression($1, "Int"); $$->location = @$; }
+	| BOOL_CONSTANT { $$ = new Expression($1, "Bool"); $$->location = @$; }
+	| STRING_CONSTANT { $$ = new Expression($1, "String"); $$->location = @$; }
 	;
 
 identifiers
-	: IDENTIFIER { $$ = new Expression($1); }
-	| SELF { $$ = new Expression("self"); }
+	: IDENTIFIER { $$ = new Expression($1); $$->location = @$; }
+	| SELF { $$ = new Expression("self"); $$->location = @$; }
 	;
 /*
 assignment
@@ -230,21 +235,22 @@ case_branch
 	;
 */
 arithmetic
-	: expression "+" expression { $$ = new Expression($1, "+", $3); }
-	| expression "-" expression { $$ = new Expression($1, "-", $3); }
-	| expression "*" expression { $$ = new Expression($1, "*", $3); }
-	| expression "/" expression { $$ = new Expression($1, "/", $3); }
+	: expression "+" expression { $$ = new Expression($1, "+", $3); $$->location = @$; }
+	| expression "-" expression { $$ = new Expression($1, "-", $3); $$->location = @$; }
+	| expression "*" expression { $$ = new Expression($1, "*", $3); $$->location = @$; }
+	| expression "/" expression { $$ = new Expression($1, "/", $3); $$->location = @$; }
 	| "~" expression { $$ = new Expression($2, "~", NULL); }
 	;
 
 comparison
-	: expression "<" expression { $$ = new Expression($1, "<", $3); }
-	| expression "<=" expression { $$ = new Expression($1, "<=", $3); }
-	| expression "=" expression { $$ = new Expression($1, "=", $3); }
-	| NOT expression { $$ = new Expression($2, "not", NULL); }
+	: expression "<" expression { $$ = new Expression($1, "<", $3); $$->location = @$; }
+	| expression "<=" expression { $$ = new Expression($1, "<=", $3); $$->location = @$; }
+	| expression "=" expression { $$ = new Expression($1, "=", $3); $$->location = @$; }
+	| NOT expression { $$ = new Expression($2, "not", NULL); $$->location = @$; }
 	;
 %%
 
 void yy::CoolParser::error(const location_type& location, const std::string& msg){
-	compiler.error(location, msg);
+	compiler.errorStream << msg;
+	compiler.error(location);
 }
