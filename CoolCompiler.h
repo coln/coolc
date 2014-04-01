@@ -6,8 +6,8 @@ class TypeTable;
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "Class.h"
-#include "TypeTable.h"
+#include "syntax/Class.h"
+#include "syntax/TypeTable.h"
 #include "parser.h"
 
 // Tell Flex the lexer's prototype ...

@@ -2,7 +2,7 @@
 #define COOL_SYMBOL_H_
 
 #include <string>
-#include "parser.h"
+#include "../parser.h"
 
 class Symbol {
 public:

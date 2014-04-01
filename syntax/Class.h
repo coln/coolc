@@ -8,7 +8,7 @@ class Expression;
 #include <vector>
 #include "Features.h"
 #include "Expression.h"
-#include "parser.h"
+#include "../parser.h"
 
 class Class {
 public:

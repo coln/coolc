@@ -9,7 +9,7 @@
 #define YYERROR_VERBOSE 1
 #include <string>
 #include <vector>
-#include "TypeTable.h"
+#include "syntax/TypeTable.h"
 class TypeTable;
 class CoolCompiler;
 class Class;
@@ -34,12 +34,12 @@ class Expression;
 %code {
 // We include it here because CoolCompiler needs to know about the yy namespace
 #include "CoolCompiler.h"
-#include "Class.h"
-#include "Features.h"
-#include "Attribute.h"
-#include "Method.h"
-#include "Symbol.h"
-#include "Expression.h"
+#include "syntax/Class.h"
+#include "syntax/Features.h"
+#include "syntax/Attribute.h"
+#include "syntax/Method.h"
+#include "syntax/Symbol.h"
+#include "syntax/Expression.h"
 
 // This allows for the std::vector<Symbol*> type below with the %printer
 std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){

@@ -8,7 +8,7 @@ class Method;
 #include <vector>
 #include "Attribute.h"
 #include "Method.h"
-#include "parser.h"
+#include "../parser.h"
 
 class Features {
 public:

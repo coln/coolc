@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string>
 #include "Symbol.h"
-#include "parser.h"
+#include "../parser.h"
 
 class Expression {
 public:

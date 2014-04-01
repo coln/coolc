@@ -19,17 +19,26 @@ struct Join {
 }
 ```
 
-Hand Written
-============
+### Hand Written
+
 I understand hand-writing things are usually not the way to program, however I am 
 learning so it's all good. After reading [this overview on Bison's tables](http://www.cs.uic.edu/~spopuri/cparser.html),
 I realized that to keep going on the route I'm traveling down I would have to optimize all these tables
 and pretty much create a mini-Bison. So....nah. I think I got the gist.
 
-Stages of Compilation
-=====================
+This was the case for branches *grammer01*, *grammar02*, and *grammar03*
+
+### Stages of Compilation
+
 - Lexical Analysis
 - Parsing
 - Semantic Analysis
 - Optimization
 - Code Generation
+
+### Resources I utilized
+
+[Bison manual](http://www.gnu.org/software/bison/manual/bison.pdf)  
+[Lex & Yacc Tutorial](http://epaperpress.com/lexandyacc/download/LexAndYaccTutorial.pdf)  
+manuals/cool_tour.pdf  
+manuals/cool_manual.pdf  
