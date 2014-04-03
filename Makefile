@@ -12,12 +12,14 @@ LEXER_OUT = $(LEXER:.ll=.cpp)
 BISON_FLAGS = -o $(PARSER_OUT) --defines=$(PARSER_H)
 FLEX_FLAGS = -o $(LEXER_OUT)
 
-SOURCES = Main.cpp CoolCompiler.cpp
-SOURCES += syntax/TypeTable.cpp
+SOURCES = Main.cpp CoolCompiler.cpp Semantic.cpp
+SOURCES += syntax/Type.cpp syntax/SymbolTable.cpp
+SOURCES += syntax/Destructor.cpp
 SOURCES += syntax/Class.cpp syntax/Features.cpp syntax/Attribute.cpp 
 SOURCES += syntax/Symbol.cpp syntax/Method.cpp syntax/Expression.cpp
-HEADERS = CoolCompiler.h
-HEADERS += syntax/TypeTable.h
+HEADERS = CoolCompiler.h Semantic.h
+HEADERS += syntax/Type.h syntax/SymbolTable.h
+HEADERS += syntax/Destructor.h
 HEADERS += syntax/Class.h syntax/Features.h syntax/Attribute.h syntax/Symbol.h
 HEADERS += syntax/Method.h syntax/Expression.h
 OBJECTS = $(SOURCES:.cpp=.o)

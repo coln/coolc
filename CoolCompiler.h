@@ -1,13 +1,12 @@
 #ifndef COOL_COOL_COMPILER_H_
 #define COOL_COOL_COMPILER_H_
 
-class TypeTable;
-
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "syntax/Destructor.h"
 #include "syntax/Class.h"
-#include "syntax/TypeTable.h"
+#include "Semantic.h"
 #include "parser.h"
 
 // Tell Flex the lexer's prototype ...
@@ -17,43 +16,38 @@ class TypeTable;
 YY_DECL;
 
 class CoolCompiler {
+private:
+	CoolCompiler(const CoolCompiler&);
+	CoolCompiler& operator=(CoolCompiler);
+	
 public:
 	struct Flags {
 		bool verbose;
-		bool traceLexer;
-		bool traceParser;
-		bool traceAnalyzer;
+		bool lexer;
+		bool parser;
+		bool semantic;
+		bool types;
 		std::string outputFile;
 		Flags() : verbose(false),
-						traceLexer(false), traceParser(false), traceAnalyzer(false),
+						lexer(false), parser(false), semantic(false),
+						types(false),
 						outputFile("") {}
 	} flags;
-	
-	TypeTable typeTable;
-	std::vector<Class*> classes;
 	std::string filename;
-	bool errorFlag;
 	int result;
+	
+	std::vector<Class*> classes;
 	
 	CoolCompiler();
 	virtual ~CoolCompiler();
-	void destructClass(Class*&);
-	void destructFeatures(Features*&);
-	void destructAttribute(Attribute*&);
-	void destructSymbol(Symbol*&);
-	void destructMethod(Method*&);
-	void destructExpression(Expression*&);
 	
 	bool compile(int, int, char**);
 	void lexerBegin();
 	void lexerEnd();
 	int parse(const std::string&);
-	bool analyze();
-	
-	std::stringstream traceStream;
-	void traceAnalyzer();
 	
 	std::stringstream errorStream;
+	void error(const yy::location&, const std::string&);
 	void error(const yy::location&);
 	void error(const std::string&);
 	void error();

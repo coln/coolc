@@ -9,8 +9,6 @@
 #define YYERROR_VERBOSE 1
 #include <string>
 #include <vector>
-#include "syntax/TypeTable.h"
-class TypeTable;
 class CoolCompiler;
 class Class;
 class Features;
@@ -43,7 +41,7 @@ class Expression;
 
 // This allows for the std::vector<Symbol*> type below with the %printer
 std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
-	os << "std::vecotr<Symbol*>";
+	os << "std::vector<Symbol*>";
 	return os;
 }
 
@@ -51,19 +49,22 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
 
 %printer { yyoutput << $$; } <*>;
 
-// Define Terminals
-%define api.token.prefix {TOK_}
-%token <std::string> IDENTIFIER TYPE;
-%token <std::string> INT_CONSTANT BOOL_CONSTANT STRING_CONSTANT;
-
-%type <Class*> class;
+// Define NonTerminals
+%type <Class*> class_definition;
 %type <Features*> features;
 %type <Attribute*> attribute;
 %type <Method*> method;
 %type <Symbol*> symbol_declaration;
 %type <std::vector<Symbol*>> init_arg_list;
-%type <Expression*> expression constants identifiers arithmetic comparison;
+%type <Expression*> expression;
+%type <Expression*> constants identifiers;
+//%type <Expression*> assignment dispatch conditional loop block let cases;
+%type <Expression*> arithmetic comparison;
 
+// Define Terminals
+%define api.token.prefix {TOK_EN}
+%token <std::string> IDENTIFIER TYPE;
+%token <std::string> INT_CONSTANT BOOL_CONSTANT STRING_CONSTANT;
 %token END 0;
 %token CLASS INHERITS NEW SELF;
 %token LET IN CASE OF ESAC CASE_ASSIGN "=>";
@@ -94,12 +95,12 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
 %%
 program
 	: %empty
-	| program class
-	| program class error { yyerrok; }
+	| program class_definition
+	| program class_definition error { yyerrok; }
 	;
 
 // Class definitions
-class
+class_definition
 	: CLASS TYPE "{" features "}" ";"
 		{
 			compiler.classes.push_back(new Class($2, $4));
@@ -153,14 +154,14 @@ expression
 	: "(" expression ")" { $$ = $2; }
 	| constants { $$ = $1; }
 	| identifiers { $$ = $1; }
-	/*| assignment
+	/*| assignment { $$ = $1; }
 	| dispatch
 	| conditional
 	| loop
 	| "{" block "}"
 	| let 
 	| cases
-	| NEW TYPE
+	| NEW TYPE { $$ = new Expression($2, $1); }
 	| ISVOID expression*/
 	| arithmetic { $$ = $1; }
 	| comparison { $$ = $1; }
@@ -177,12 +178,12 @@ identifiers
 	: IDENTIFIER { $$ = new Expression($1); $$->location = @$; }
 	| SELF { $$ = new Expression("self"); $$->location = @$; }
 	;
-/*
-assignment
-	: IDENTIFIER ASSIGN expression
+
+/*assignment
+	: identifiers ASSIGN expression { $$ = new Expression($1, "<-", $3); $$->location = @$; }
 	;
 
-dispatch
+/*ispatch
 	: dispatch_id "(" arg_list ")"
 	| dispatch_id "(" ")"
 	;

@@ -44,7 +44,7 @@ location.step();
 
  /* Comments */
 "(*"                   { BEGIN(MULTI_COMMENT); }
-<MULTI_COMMENT><<EOF>> { compiler.error("unclosed comment"); BEGIN(INITIAL); }
+<MULTI_COMMENT><<EOF>> { compiler.error(location, "unclosed comment"); BEGIN(INITIAL); }
 <MULTI_COMMENT>"*)"    { BEGIN(INITIAL); }
 <MULTI_COMMENT>.       {}
 	
@@ -56,7 +56,7 @@ location.step();
 {STRING_CONSTANT}  {
 	int len = strlen(yytext);
 	if(len > MAX_STRING_LENGTH){
-		compiler.error("string constant length too long");
+		compiler.error(location, "string constant length too long");
 		len = MAX_STRING_LENGTH;
 	}
 	return yy::CoolParser::make_STRING_CONSTANT(yytext, location);
@@ -111,6 +111,7 @@ location.step();
 
  /* Identifiers/Types */
 {IDENTIFIER}  { return yy::CoolParser::make_IDENTIFIER(yytext, location); }
+"SELF_TYPE" { return yy::CoolParser::make_TYPE(yytext, location); }
 {TYPE}  { return yy::CoolParser::make_TYPE(yytext, location); }
 
 
@@ -125,7 +126,7 @@ location.step();
 %%
 
 void CoolCompiler::lexerBegin(){
-	yy_flex_debug = flags.verbose || flags.traceLexer;
+	yy_flex_debug = flags.verbose || flags.lexer;
 	if(filename.empty() || filename == "-"){
 		errorStream << "no input files";
 		error();

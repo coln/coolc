@@ -3,12 +3,14 @@
 #include <iostream>
 Expression::Expression(){}
 Expression::Expression(std::string identifier)
-	: symbol(new Symbol(identifier, "")), lhs(NULL), op(NULL), rhs(NULL)
+	: lhs(NULL), op(""), rhs(NULL)
 {
+	symbol = new Symbol(identifier, "");
 }
 Expression::Expression(std::string identifier, std::string type)
-	: symbol(new Symbol(identifier, type)), lhs(NULL), op(""), rhs(NULL)
+	: lhs(NULL), op(""), rhs(NULL)
 {
+	symbol = new Symbol(identifier, type);
 }
 Expression::Expression(Expression *lhs, std::string op, Expression *rhs)
 	: symbol(NULL), lhs(lhs), op(op), rhs(rhs)

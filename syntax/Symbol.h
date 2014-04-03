@@ -2,6 +2,7 @@
 #define COOL_SYMBOL_H_
 
 #include <string>
+#include "Type.h"
 #include "../parser.h"
 
 class Symbol {
@@ -10,7 +11,8 @@ public:
 	std::string name;
 	std::string type;
 	
-	Symbol(std::string, std::string);
+	Symbol(const std::string, const std::string);
+	bool operator==(const Symbol&) const;
 };
 
 #endif
