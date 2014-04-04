@@ -2,13 +2,15 @@
 
 CoolCompiler::CoolCompiler(){}
 
-/* This way, I can create new temp pointer and not worry about having
- * everything destruct when I want to delete the temp
- */
 CoolCompiler::~CoolCompiler(){
-	Destructor destructor;
-	destructor.classes = &classes;
-	destructor.run();
+	if(classes.size() <= 0){
+		return;
+	}
+	std::vector<Class*>::iterator it;
+	for(it = classes.begin(); it != classes.end(); ++it){
+		delete *it;
+	}
+	classes.clear();
 }
 
 

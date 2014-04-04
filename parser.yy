@@ -11,11 +11,11 @@
 #include <vector>
 class CoolCompiler;
 class Class;
-class Features;
 class Attribute;
 class Method;
 class Symbol;
 class Expression;
+class Assignment;
 }
 
 // The parsing context
@@ -33,15 +33,19 @@ class Expression;
 // We include it here because CoolCompiler needs to know about the yy namespace
 #include "CoolCompiler.h"
 #include "syntax/Class.h"
-#include "syntax/Features.h"
 #include "syntax/Attribute.h"
 #include "syntax/Method.h"
 #include "syntax/Symbol.h"
 #include "syntax/Expression.h"
+#include "syntax/Assignment.h"
 
 // This allows for the std::vector<Symbol*> type below with the %printer
 std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
 	os << "std::vector<Symbol*>";
+	return os;
+}
+std::ostream& operator<<(std::ostream& os, const std::vector<Expression*>& obj){
+	os << "std::vector<Expression*>";
 	return os;
 }
 
@@ -51,15 +55,16 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
 
 // Define NonTerminals
 %type <Class*> class_definition;
-%type <Features*> features;
+%type <std::vector<Expression*>> features;
 %type <Attribute*> attribute;
 %type <Method*> method;
 %type <Symbol*> symbol_declaration;
 %type <std::vector<Symbol*>> init_arg_list;
 %type <Expression*> expression;
 %type <Expression*> constants identifiers;
+%type <Expression*> assignment;
 //%type <Expression*> assignment dispatch conditional loop block let cases;
-%type <Expression*> arithmetic comparison;
+//%type <Expression*> arithmetic comparison;
 
 // Define Terminals
 %define api.token.prefix {TOK_EN}
@@ -103,49 +108,85 @@ program
 class_definition
 	: CLASS TYPE "{" features "}" ";"
 		{
-			compiler.classes.push_back(new Class($2, $4));
-			compiler.classes.back()->location = @$;
+			Class *newClass = new Class($2);
+			newClass->location = @$;
+			newClass->features = $4;
+			compiler.classes.push_back(newClass);
 		}
 	| CLASS TYPE INHERITS TYPE "{" features "}" ";"
 		{
-			compiler.classes.push_back(new Class($2, $4, $6));
-			compiler.classes.back()->location = @$;
+			Class *newClass = new Class($2, $4);
+			newClass->location = @$;
+			newClass->features = $6;
+			compiler.classes.push_back(newClass);
 		}
 	;
 
 features
-	: %empty { $$ = new Features(); $$->location = @$;  }
-	| features attribute ";" { $1->addAttribute($2); $$ = $1; }
-	| features method ";" { $1->addMethod($2); $$ = $1; }
+	: %empty
+		{
+			$$ = $$;
+		}
+	| features attribute ";"
+		{
+			$1.push_back($2);
+			$$ = $1;
+		}
+	| features method ";"
+		{
+			$1.push_back($2);
+			$$ = $1;
+		}
 	;
 
 // Class variables/symbols/attributes
 attribute
-	: symbol_declaration { $$ = new Attribute($1); $$->location = @$; }
-	| symbol_declaration "<-" expression { $$ = new Attribute($1, $3); $$->location = @$; }
+	: symbol_declaration
+		{
+			$$ = new Attribute($1);
+			$$->location = @$;
+		}
+	| symbol_declaration "<-" expression
+		{
+			$$ = new Attribute($1, $3);
+			$$->location = @$;
+		}
 	;
 
 symbol_declaration
-	: IDENTIFIER ":" TYPE { $$ = new Symbol($1, $3); $$->location = @$; }
+	: IDENTIFIER ":" TYPE
+		{
+			$$ = new Symbol($1, $3);
+			$$->location = @$;
+		}
 	;
 
 // Method/function definitions
 method
 	: IDENTIFIER "(" ")" ":" TYPE "{" expression "}"
 		{
-			$$ = new Method($1, $5, $7);
+			Symbol *name = new Symbol($1, $5);
+			$$ = new Method(name, $7);
 			$$->location = @$;
 		}
 	| IDENTIFIER "(" init_arg_list ")" ":" TYPE "{" expression "}"
 		{
-			$$ = new Method($1, $6, $3, $8);
+			Symbol *name = new Symbol($1, $6);
+			$$ = new Method(name, $3, $8);
 			$$->location = @$;
 		}
 	;
 
 init_arg_list
-	: symbol_declaration { $$.push_back($1); }
-	| init_arg_list "," symbol_declaration { $1.push_back($3); }
+	: symbol_declaration
+		{
+			$$.push_back($1);
+		}
+	| init_arg_list "," symbol_declaration
+		{
+			$1.push_back($3);
+			$$ = $1;
+		}
 	;
 
 
@@ -154,36 +195,60 @@ expression
 	: "(" expression ")" { $$ = $2; }
 	| constants { $$ = $1; }
 	| identifiers { $$ = $1; }
-	/*| assignment { $$ = $1; }
-	| dispatch
+	| assignment { $$ = $1; }
+	/*| dispatch
 	| conditional
 	| loop
 	| "{" block "}"
 	| let 
 	| cases
 	| NEW TYPE { $$ = new Expression($2, $1); }
-	| ISVOID expression*/
+	| ISVOID expression
 	| arithmetic { $$ = $1; }
-	| comparison { $$ = $1; }
+	| comparison { $$ = $1; }*/
 	;
 
-
+// Convert to type table/symbol table? something
 constants
-	: INT_CONSTANT { $$ = new Expression($1, "Int"); $$->location = @$; }
-	| BOOL_CONSTANT { $$ = new Expression($1, "Bool"); $$->location = @$; }
-	| STRING_CONSTANT { $$ = new Expression($1, "String"); $$->location = @$; }
+	: INT_CONSTANT
+		{
+			$$ = new Symbol($1, "Int");
+			$$->location = @$;
+		}
+	| BOOL_CONSTANT
+		{
+			$$ = new Symbol($1, "Bool");
+			$$->location = @$;
+		}
+	| STRING_CONSTANT
+		{
+			$$ = new Symbol($1, "String");
+			$$->location = @$;
+		}
 	;
 
 identifiers
-	: IDENTIFIER { $$ = new Expression($1); $$->location = @$; }
-	| SELF { $$ = new Expression("self"); $$->location = @$; }
+	: IDENTIFIER
+		{
+			$$ = new Symbol($1);
+			$$->location = @$;
+		}
+	| SELF
+		{
+			$$ = new Symbol("self");
+			$$->location = @$;
+		}
 	;
 
-/*assignment
-	: identifiers ASSIGN expression { $$ = new Expression($1, "<-", $3); $$->location = @$; }
+assignment
+	: identifiers ASSIGN expression
+		{
+			$$ = new Assignment($1, $3);
+			$$->location = @$;
+		}
 	;
 
-/*ispatch
+dispatch
 	: dispatch_id "(" arg_list ")"
 	| dispatch_id "(" ")"
 	;
@@ -198,7 +263,7 @@ arg_list
 	: expression
 	| arg_list "," expression
 	;
-
+/*
 conditional
 	: IF expression THEN expression FI
 	| IF expression THEN expression ELSE expression FI
@@ -234,7 +299,7 @@ case_branches
 case_branch
 	: symbol_declaration "=>" expression ";"
 	;
-*/
+
 arithmetic
 	: expression "+" expression { $$ = new Expression($1, "+", $3); $$->location = @$; }
 	| expression "-" expression { $$ = new Expression($1, "-", $3); $$->location = @$; }
@@ -249,6 +314,7 @@ comparison
 	| expression "=" expression { $$ = new Expression($1, "=", $3); $$->location = @$; }
 	| NOT expression { $$ = new Expression($2, "not", NULL); $$->location = @$; }
 	;
+*/
 %%
 
 void yy::CoolParser::error(const location_type& location, const std::string& msg){

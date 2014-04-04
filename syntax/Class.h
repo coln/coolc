@@ -1,24 +1,21 @@
 #ifndef COOL_CLASS_H_
 #define COOL_CLASS_H_
 
-class Features;
 class Expression;
 
 #include <string>
 #include <vector>
-#include "Features.h"
 #include "Expression.h"
 #include "../parser.h"
 
-class Class {
+class Class : public Expression {
 public:
-	yy::location location;
 	std::string name;
 	std::string inherits;
-	Features *features;
+	std::vector<Expression*> features;
 	
-	Class(std::string, Features*);
-	Class(std::string, std::string, Features*);
+	Class(const std::string&);
+	Class(const std::string&, const std::string&);
 	~Class();
 };
 

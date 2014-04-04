@@ -1,7 +1,6 @@
 #include "Attribute.h"
 
 Attribute::Attribute()
-	: location(location)
 {
 }
 Attribute::Attribute(Symbol *symbol)
@@ -13,14 +12,17 @@ Attribute::Attribute(Symbol *symbol, Expression *expression)
 {
 }
 Attribute::Attribute(const Attribute& a)
-	: location(a.location), symbol(a.symbol), expression(a.expression)
+	: Expression(a), symbol(a.symbol), expression(a.expression)
 {
 }
 Attribute& Attribute::operator=(Attribute a){
-	location = a.location;
+	Expression::operator=(a);
 	std::swap(this->symbol, a.symbol); 
 	std::swap(this->expression, a.expression);
 	return *this;
 }
 
-Attribute::~Attribute(){}
+Attribute::~Attribute(){
+	delete symbol;
+	delete expression;
+}

@@ -13,7 +13,6 @@ class CoolCompiler;
 
 class Semantic {
 private:	
-	SymbolTable symbolTable;
 	Type objectType;
 	std::stringstream traceStream;
 	bool populateTypes();

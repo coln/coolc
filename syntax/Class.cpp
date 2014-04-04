@@ -1,11 +1,17 @@
 #include "Class.h"
 
-Class::Class(std::string name, Features *features)
-	: name(name), features(features)
+Class::Class(const std::string &name)
+	: name(name)
 {
 }
-Class::Class(std::string name, std::string inherits, Features *features)
-	: name(name), inherits(inherits), features(features)
+Class::Class(const std::string &name, const std::string &inherits)
+	: name(name), inherits(inherits)
 {
 }
-Class::~Class(){}
+Class::~Class(){
+	std::vector<Expression*>::iterator it;
+	for(it = features.begin(); it != features.end(); ++it){
+		delete *it;
+	}
+	features.clear();
+}

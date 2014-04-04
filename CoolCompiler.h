@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "syntax/Destructor.h"
 #include "syntax/Class.h"
 #include "Semantic.h"
 #include "parser.h"
@@ -36,6 +35,7 @@ public:
 	std::string filename;
 	int result;
 	
+	SymbolTable symbolTable;
 	std::vector<Class*> classes;
 	
 	CoolCompiler();

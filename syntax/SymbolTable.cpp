@@ -10,7 +10,7 @@ SymbolTable& SymbolTable::operator=(SymbolTable s){
 	return *this;
 }
 SymbolTable::~SymbolTable(){
-	// Symbols will be destroyed using Destructor class
+	// Symbols will be destroyed by the classes container
 	ScopeList::iterator it;
 	for(it = table.begin(); it != table.end(); ++it){
 		it->clear();
