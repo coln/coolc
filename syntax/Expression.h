@@ -12,7 +12,11 @@ public:
 	Expression& operator=(Expression);
 	~Expression();
 	
+	// For interpreter
 	//virtual void evaluate();
+	
+	// For compiler
+	// virtual void assemble();
 };
 
 #endif

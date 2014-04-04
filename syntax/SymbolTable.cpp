@@ -52,13 +52,19 @@ Symbol* SymbolTable::find(const std::string &name){
 	return NULL;
 }
 
+// Check current scope, and all parent scopes
 bool SymbolTable::checkScope(const Symbol* &s){
+	ScopeList::iterator sl_it;
+	Scope *scope;
 	Scope::iterator it;
 	Symbol *symbol;
-	for(it = currentScope->begin(); it != currentScope->end(); ++it){
-		symbol = *it;
-		if(*symbol == *s){
-			return true;
+	for(sl_it = table.begin(); sl_it != table.end(); ++sl_it){
+		scope = &(*sl_it);
+		for(it = scope->begin(); it != scope->end(); ++it){
+			symbol = *it;
+			if(*symbol == *s){
+				return true;
+			}
 		}
 	}
 	return false;

@@ -14,5 +14,5 @@ The files in this directory make up the syntax tree like so:
 	- Loop
 	- Block
 
-Their addition is handled by parser.yy, and their deletion is handled by 
-CoolCompiler.cpp
+Their addition is handled by parser.yy, and their deletion is handled by each
+destructor

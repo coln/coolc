@@ -1,8 +1,6 @@
 #ifndef COOL_CLASS_H_
 #define COOL_CLASS_H_
 
-class Expression;
-
 #include <string>
 #include <vector>
 #include "Expression.h"
