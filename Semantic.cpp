@@ -9,6 +9,9 @@ Semantic::Semantic(CoolCompiler &compiler)
 }
 
 bool Semantic::populateTypes(){
+	traceStream << "Checking for class Main";
+	trace();
+	
 	// Make sure class Main is found
 	bool mainFound = false;
 	
@@ -38,6 +41,9 @@ bool Semantic::populateTypes(){
 	return true;
 }
 bool Semantic::organizeTypes(){
+	traceStream << "Checking inheritance";
+	trace();
+	
 	std::vector<Class*>::iterator it;
 	Class *thisClass;
 	Type *currentType;
@@ -73,8 +79,7 @@ bool Semantic::organizeTypes(){
 	}
 	
 	if(compiler.flags.types){
-		std::cout << "Type Inheritance Tree" << std::endl;
-		std::cout << "=====================" << std::endl;
+		std::cout << "Type Inheritance Tree:" << std::endl;
 		objectType.print();
 	}
 	

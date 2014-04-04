@@ -16,12 +16,14 @@ SOURCES = Main.cpp CoolCompiler.cpp Semantic.cpp
 SOURCES += syntax/Type.cpp syntax/SymbolTable.cpp
 SOURCES += syntax/Class.cpp syntax/Attribute.cpp 
 SOURCES += syntax/Symbol.cpp syntax/Method.cpp syntax/Expression.cpp
-SOURCES += syntax/Assignment.cpp
+SOURCES += syntax/Assignment.cpp syntax/Conditional.cpp syntax/Loop.cpp
+SOURCES += syntax/Block.cpp
 HEADERS = CoolCompiler.h Semantic.h
 HEADERS += syntax/Type.h syntax/SymbolTable.h
 HEADERS += syntax/Class.h syntax/Attribute.h syntax/Symbol.h
 HEADERS += syntax/Method.h syntax/Expression.h
-HEADERS += syntax/Assignment.h
+HEADERS += syntax/Assignment.h syntax/Conditional.h syntax/Loop.h
+HEADERS += syntax/Block.h
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = coolc
 

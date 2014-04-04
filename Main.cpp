@@ -4,7 +4,7 @@
 #include "parser.h"
 
 void printUsage();
-void getFlags(CoolCompiler&, int, char**);
+bool getFlags(CoolCompiler&, int, char**);
 
 
 int main(int argc, char* argv[]){
@@ -13,7 +13,10 @@ int main(int argc, char* argv[]){
 		printUsage();
 		return 1;
 	}
-	getFlags(compiler, argc, argv);
+	bool flags = getFlags(compiler, argc, argv);
+	if(!flags){
+		return 1;
+	}
 	
 	// The remaining arguments should be filenames
 	if(!compiler.compile(optind, argc, argv)){
@@ -47,20 +50,20 @@ void printUsage(){
 			 "\n"
 			 ;
 }
-void getFlags(CoolCompiler& compiler, int argc, char* argv[]){
+bool getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 	int flag;
 	while(true){
 		static struct option long_options[] = {
 			{"verbose", no_argument, 0, 'v'},
 			{"lexer", no_argument, 0, 'l'},
 			{"parser", no_argument, 0, 'p'},
-			{"analyzer", no_argument, 0, 'a'},
+			{"semantic", no_argument, 0, 's'},
 			{"types", no_argument, 0, 't'},
 			{"output", required_argument, 0, 'o'}
 		};
 		// getopt_long stores the option index here
 		int option_index = 0;
-		flag = getopt_long(argc, argv, "vlpato:", long_options, &option_index);
+		flag = getopt_long(argc, argv, "vlpsto:", long_options, &option_index);
 		switch(flag){
 			case 'v':
 				compiler.flags.verbose = true;
@@ -71,7 +74,7 @@ void getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 			case 'p':
 				compiler.flags.parser = true;
 				break;
-			case 'a':
+			case 's':
 				compiler.flags.semantic = true;
 				break;
 			case 't':
@@ -83,9 +86,10 @@ void getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 			case '?':
 				// getopt_long reported an error, so print usage once
 				printUsage();
-				return;
+				return false;
 			default:
-				return;
+				return true;
 		}
 	}
+	return true;
 }

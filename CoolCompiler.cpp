@@ -17,6 +17,11 @@ CoolCompiler::~CoolCompiler(){
 bool CoolCompiler::compile(int optind, int argc, char* argv[]){
 	// Lex/Parse each input file
 	int optionIndex = optind;
+	if(optionIndex >= argc){
+		errorStream << "no input files";
+		error();
+		return false;
+	}
 	while(optionIndex < argc){
 		filename = argv[optionIndex];
 		if(parse(argv[optionIndex++])){

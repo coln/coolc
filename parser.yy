@@ -16,6 +16,9 @@ class Method;
 class Symbol;
 class Expression;
 class Assignment;
+class Conditional;
+class Loop;
+class Block;
 }
 
 // The parsing context
@@ -38,8 +41,11 @@ class Assignment;
 #include "syntax/Symbol.h"
 #include "syntax/Expression.h"
 #include "syntax/Assignment.h"
+#include "syntax/Conditional.h"
+#include "syntax/Loop.h"
+#include "syntax/Block.h"
 
-// This allows for the std::vector<Symbol*> type below with the %printer
+// This allows for the vector type below with the %printer
 std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
 	os << "std::vector<Symbol*>";
 	return os;
@@ -62,7 +68,8 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Expression*>& obj){
 %type <std::vector<Symbol*>> init_arg_list;
 %type <Expression*> expression;
 %type <Expression*> constants identifiers;
-%type <Expression*> assignment;
+%type <Expression*> assignment conditional loop;
+%type <Block*> block;
 //%type <Expression*> assignment dispatch conditional loop block let cases;
 //%type <Expression*> arithmetic comparison;
 
@@ -196,12 +203,12 @@ expression
 	| constants { $$ = $1; }
 	| identifiers { $$ = $1; }
 	| assignment { $$ = $1; }
-	/*| dispatch
-	| conditional
-	| loop
-	| "{" block "}"
-	| let 
-	| cases
+	/*| dispatch*/
+	| conditional { $$ = $1; }
+	| loop { $$ = $1; }
+	| "{" block "}" { $$ = $2; }
+	/*| let { $$ = $1; }
+	| cases { $$ = $1; }
 	| NEW TYPE { $$ = new Expression($2, $1); }
 	| ISVOID expression
 	| arithmetic { $$ = $1; }
@@ -248,7 +255,7 @@ assignment
 		}
 	;
 
-dispatch
+/*dispatch
 	: dispatch_id "(" arg_list ")"
 	| dispatch_id "(" ")"
 	;
@@ -263,21 +270,41 @@ arg_list
 	: expression
 	| arg_list "," expression
 	;
-/*
+*/
 conditional
 	: IF expression THEN expression FI
+		{
+			$$ = new Conditional($2, $4);
+			$$->location = @$;
+		}
 	| IF expression THEN expression ELSE expression FI
+		{
+			$$ = new Conditional($2, $4, $6);
+			$$->location = @$;	
+		}
 	;
-	
+
 loop
 	: WHILE expression LOOP expression POOL
+		{
+			$$ = new Loop($2, $4);
+			$$->location = @$;
+		}
 	;
 
 block
 	: expression ";"
+		{
+			$$ = new Block();
+			$$->location = @$;
+		}
 	| block expression ";"
+		{
+			$$->expressions.push_back($2);
+			$$ = $1;
+		}
 	;
-
+/*
 let
 	: LET init_attribute_list IN expression
 	;

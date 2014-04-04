@@ -8,6 +8,8 @@ public:
 	Expression *identifier;
 	Expression *expression;
 	Assignment(Expression*, Expression*);
+	Assignment(const Assignment&);
+	Assignment& operator=(Assignment);
 	~Assignment();
 };
 
