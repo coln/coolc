@@ -154,7 +154,17 @@ void Semantic::parseTree(){
 
 Type* Semantic::getType(Expression *expression){
 	Type *type;
-	if(expression->type == Expression::ATTRIBUTE){
+	if(expression->type == Expression::SYMBOL){
+		Symbol *symbol = dynamic_cast<Symbol*>(expression);
+		type = objectType.findChild(symbol->type);
+		if(type == NULL){
+			Symbol *find = compiler.symbolScope.find(symbol->name);
+			if(find != NULL){
+				type = objectType.findChild(find->type);
+			}
+		}
+		
+	}else if(expression->type == Expression::ATTRIBUTE){
 		Attribute *attribute = dynamic_cast<Attribute*>(expression);
 		type = objectType.findChild(attribute->symbol->type);
 		
@@ -219,7 +229,7 @@ bool Semantic::typeCheck(){
 		
 		for(feat_it = thisClass->features.begin(); feat_it != thisClass->features.end(); ++feat_it){
 			Expression *feature = *feat_it;
-			std::cout << "Check feature type" << std::endl;
+	
 			if(!typeCheckExpression(feature)){
 				return false;
 			}
@@ -231,7 +241,6 @@ bool Semantic::typeCheck(){
 }
 
 bool Semantic::typeCheckExpression(Expression *expression){
-	std::cout << "Check expression type" << std::endl;
 	if(expression->type == Expression::SYMBOL){
 		Symbol *symbol = dynamic_cast<Symbol*>(expression);
 		return typeCheckSymbol(symbol);
@@ -283,10 +292,8 @@ bool Semantic::typeCheckExpression(Expression *expression){
 }
 
 bool Semantic::typeCheckSymbol(Symbol *symbol){
-	std::cout << "Check symbol type" << std::endl;
 	Symbol *find = compiler.symbolScope.find(symbol->name);
-	if(!symbol->type.empty() && 
-		symbol->type != "Int" && 
+	if(symbol->type != "Int" && 
 		symbol->type != "Bool" && 
 		symbol->type != "String" &&
 		find == NULL)
@@ -296,17 +303,15 @@ bool Semantic::typeCheckSymbol(Symbol *symbol){
 		compiler.errorStream << " was not defined in this scope";
 		compiler.error(symbol->location);
 		return false;
-	}
-	if(symbol->type.empty()){
+	}else if(find != NULL && find->type.empty()){
 		compiler.errorStream << "cannot find type for symbol \"";
-		compiler.errorStream << symbol->name << "\"";
-		compiler.error(symbol->location);
+		compiler.errorStream << find->name << "\"";
+		compiler.error(find->location);
 		return false;
 	}
 	return true;
 }
 bool Semantic::typeCheckAttribute(Attribute *attribute){
-	std::cout << "Check attribute type" << std::endl;
 	bool checkScope = compiler.symbolScope.checkScope(attribute->symbol->name);
 	Symbol *symbol = compiler.symbolScope.find(attribute->symbol->name);
 	if(checkScope){
@@ -347,7 +352,6 @@ bool Semantic::typeCheckAttribute(Attribute *attribute){
 	return true;
 }
 bool Semantic::typeCheckMethod(Method *method){
-	std::cout << "Check method type" << std::endl;
 	Method *methodScope = compiler.methodScope.find(method->symbol->name);
 	if(methodScope != NULL){
 		compiler.errorStream << "the method \"" << method->symbol->name;
@@ -388,7 +392,6 @@ bool Semantic::typeCheckMethod(Method *method){
 	return true;
 }
 bool Semantic::typeCheckArithmetic(Arithmetic *arithmetic){
-	std::cout << "Check arithmetic type" << std::endl;
 	Type *lhsType = getType(arithmetic->lhs);
 	Type *rhsType = getType(arithmetic->rhs);
 	if(lhsType == NULL){
@@ -418,7 +421,6 @@ bool Semantic::typeCheckArithmetic(Arithmetic *arithmetic){
 	return true;
 }
 bool Semantic::typeCheckAssigment(Assignment *assignment){
-	std::cout << "Check assignment type" << std::endl;
 	Symbol *symbol = compiler.symbolScope.find(assignment->symbol->name);
 	if(symbol == NULL){
 		compiler.errorStream << "error: \"" << assignment->symbol->name;
@@ -427,7 +429,6 @@ bool Semantic::typeCheckAssigment(Assignment *assignment){
 		return false;
 	}
 	Type *type = objectType.findChild(symbol->type);
-	std::cout << "Type: " << type->name << std::endl;
 	if(type == NULL){
 		compiler.errorStream << "no such type \"" << symbol->type;
 		compiler.errorStream << "\" exists";
@@ -441,7 +442,7 @@ bool Semantic::typeCheckAssigment(Assignment *assignment){
 	Type *expressionType = getType(assignment->expression);
 	if(expressionType == NULL){
 		compiler.errorStream << "unknown assignment expression type";
-		compiler.error(assignment->location);
+		compiler.error(assignment->expression->location);
 		return false;
 	}
 	Type *check = type->findChild(expressionType->name);
@@ -458,7 +459,6 @@ bool Semantic::typeCheckAssigment(Assignment *assignment){
 	return true;
 }
 bool Semantic::typeCheckBlock(Block *block){
-	std::cout << "Check block type" << std::endl;
 	std::vector<Expression*>::iterator it;
 	for(it = block->expressions.begin(); it != block->expressions.end(); ++it){
 		if(!typeCheckExpression(*it)){
@@ -472,7 +472,6 @@ bool Semantic::typeCheckCase(Case *caseExp){
 	return true;
 }
 bool Semantic::typeCheckComparison(Comparison *comparison){
-	std::cout << "Check comparison type" << std::endl;
 	Type *lhsType = getType(comparison->lhs);
 	if(lhsType == NULL){
 		compiler.errorStream << "unknown expression type";
@@ -559,7 +558,6 @@ bool Semantic::typeCheckComparison(Comparison *comparison){
 	return true;
 }
 bool Semantic::typeCheckConditional(Conditional *conditional){
-	std::cout << "Check conditional type" << std::endl;
 	Type *ifType = getType(conditional->ifBranch);
 	if(ifType->name != "Bool"){
 		compiler.errorStream << "error: if statement type \"";
@@ -575,7 +573,6 @@ bool Semantic::typeCheckDispatch(Dispatch *dispatch){
 	return true;
 }
 bool Semantic::typeCheckLet(Let *let){
-	std::cout << "Check let type" << std::endl;
 	compiler.symbolScope.enterScope();
 	compiler.methodScope.enterScope();
 	
@@ -597,7 +594,6 @@ bool Semantic::typeCheckNew(){
 	return true;	
 }
 bool Semantic::typeCheckWhile(While *whileExp){
-	std::cout << "Check while type" << std::endl;
 	Type *whileType = getType(whileExp->condition);
 	if(whileType->name != "Bool"){
 		compiler.errorStream << "error: while statement type \"";

@@ -39,12 +39,10 @@ void SymbolScope::add(Symbol* symbol){
 Symbol* SymbolScope::find(const std::string &name){
 	ScopeList::iterator it;
 	Scope::iterator it2;
-	Symbol *symbol;
 	for(it = table.begin(); it != table.end(); ++it){
 		for(it2 = it->begin(); it2 != it->end(); ++it2){
-			symbol = *it2;
-			if(symbol->name == name){
-				return symbol;
+			if((*it2)->name == name){
+				return *it2;
 			}
 		}
 	}
