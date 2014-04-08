@@ -7,11 +7,15 @@
 class Block : public Expression {
 public:
 	std::vector<Expression*> expressions;
+	
 	Block();
 	Block(std::vector<Expression*>);
 	Block(const Block&);
 	Block& operator=(Block);
 	~Block();
+	
+	void addChild(Expression*);
+	virtual void print(int = 0);
 };
 
 #endif

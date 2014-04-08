@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 #include "syntax/Class.h"
+#include "syntax/SymbolScope.h"
+#include "syntax/MethodScope.h"
 #include "Semantic.h"
 #include "parser.h"
 
@@ -24,18 +26,20 @@ public:
 		bool verbose;
 		bool lexer;
 		bool parser;
+		bool parseTree;
 		bool semantic;
 		bool types;
 		std::string outputFile;
 		Flags() : verbose(false),
-						lexer(false), parser(false), semantic(false),
-						types(false),
+						lexer(false), parser(false), parseTree(false),
+						semantic(false), types(false),
 						outputFile("") {}
 	} flags;
 	std::string filename;
 	int result;
 	
-	SymbolTable symbolTable;
+	SymbolScope symbolScope;
+	MethodScope methodScope;
 	std::vector<Class*> classes;
 	
 	CoolCompiler();

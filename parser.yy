@@ -11,14 +11,24 @@
 #include <vector>
 class CoolCompiler;
 class Class;
+class Symbol;
 class Attribute;
 class Method;
-class Symbol;
 class Expression;
+
+class Int;
+class Bool;
+class String;
+
+class Arithmetic;
 class Assignment;
-class Conditional;
-class Loop;
 class Block;
+class Case;
+class Comparison;
+class Conditional;
+class Dispatch;
+class Let;
+class While;
 }
 
 // The parsing context
@@ -35,23 +45,19 @@ class Block;
 %code {
 // We include it here because CoolCompiler needs to know about the yy namespace
 #include "CoolCompiler.h"
-#include "syntax/Class.h"
-#include "syntax/Attribute.h"
-#include "syntax/Method.h"
-#include "syntax/Symbol.h"
-#include "syntax/Expression.h"
-#include "syntax/Assignment.h"
-#include "syntax/Conditional.h"
-#include "syntax/Loop.h"
-#include "syntax/Block.h"
+#include "Headers.h"
 
 // This allows for the vector type below with the %printer
+std::ostream& operator<<(std::ostream& os, const std::vector<Expression*>& obj){
+	os << "std::vector<Expression*>";
+	return os;
+}
 std::ostream& operator<<(std::ostream& os, const std::vector<Symbol*>& obj){
 	os << "std::vector<Symbol*>";
 	return os;
 }
-std::ostream& operator<<(std::ostream& os, const std::vector<Expression*>& obj){
-	os << "std::vector<Expression*>";
+std::ostream& operator<<(std::ostream& os, const std::vector<Attribute*>& obj){
+	os << "std::vector<Attribute*>";
 	return os;
 }
 
@@ -67,11 +73,17 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Expression*>& obj){
 %type <Symbol*> symbol_declaration;
 %type <std::vector<Symbol*>> init_arg_list;
 %type <Expression*> expression;
-%type <Expression*> constants identifiers;
-%type <Expression*> assignment conditional loop;
+%type <Symbol*> constants identifiers;
+%type <Expression*> assignment conditional loop let;
+%type <std::vector<Attribute*>> init_attribute_list;
 %type <Block*> block;
-//%type <Expression*> assignment dispatch conditional loop block let cases;
-//%type <Expression*> arithmetic comparison;
+
+%type <Expression*> cases;
+%type <std::vector<Attribute*>> case_branches;
+%type <Attribute*> case_branch;
+
+%type <Expression*> arithmetic comparison;
+
 
 // Define Terminals
 %define api.token.prefix {TOK_EN}
@@ -130,10 +142,7 @@ class_definition
 	;
 
 features
-	: %empty
-		{
-			$$ = $$;
-		}
+	: %empty { $$; }
 	| features attribute ";"
 		{
 			$1.push_back($2);
@@ -207,12 +216,12 @@ expression
 	| conditional { $$ = $1; }
 	| loop { $$ = $1; }
 	| "{" block "}" { $$ = $2; }
-	/*| let { $$ = $1; }
+	| let { $$ = $1; }
 	| cases { $$ = $1; }
-	| NEW TYPE { $$ = new Expression($2, $1); }
-	| ISVOID expression
+	/*| NEW TYPE { $$ = new Expression($2, $1); }
+	| ISVOID expression*/
 	| arithmetic { $$ = $1; }
-	| comparison { $$ = $1; }*/
+	| comparison { $$ = $1; }
 	;
 
 // Convert to type table/symbol table? something
@@ -287,7 +296,7 @@ conditional
 loop
 	: WHILE expression LOOP expression POOL
 		{
-			$$ = new Loop($2, $4);
+			$$ = new While($2, $4);
 			$$->location = @$;
 		}
 	;
@@ -297,51 +306,94 @@ block
 		{
 			$$ = new Block();
 			$$->location = @$;
+			$$->addChild($1);
 		}
 	| block expression ";"
 		{
-			$$->expressions.push_back($2);
+			$1->addChild($2);
 			$$ = $1;
 		}
 	;
-/*
+
 let
 	: LET init_attribute_list IN expression
+		{
+			$$ = new Let($2, $4);
+			$$->location = @$;
+		}
 	;
 
 init_attribute_list
 	: attribute
+		{
+			$$.push_back($1);
+		}
 	| init_attribute_list "," attribute
+		{
+			$1.push_back($3);
+			$$ = $1;
+		}
 	;
 
 cases
 	: CASE expression OF case_branches ESAC
+		{
+			$$ = new Case($2, $4);
+			$$->location = @$;
+		}
 	;
 
 case_branches
 	: case_branch
+		{
+			$$.push_back($1);
+		}
 	| case_branches case_branch
+		{
+			$1.push_back($2);
+			$$ = $1;
+		}
 	;
 
 case_branch
 	: symbol_declaration "=>" expression ";"
+		{
+			$$ = new Attribute($1, $3);
+			$$->location = @$;
+		}
 	;
 
 arithmetic
-	: expression "+" expression { $$ = new Expression($1, "+", $3); $$->location = @$; }
-	| expression "-" expression { $$ = new Expression($1, "-", $3); $$->location = @$; }
-	| expression "*" expression { $$ = new Expression($1, "*", $3); $$->location = @$; }
-	| expression "/" expression { $$ = new Expression($1, "/", $3); $$->location = @$; }
-	| "~" expression { $$ = new Expression($2, "~", NULL); }
+	: expression "+" expression { $$ = new Arithmetic($1, Arithmetic::PLUS, $3); $$->location = @$; }
+	| expression "-" expression { $$ = new Arithmetic($1, Arithmetic::MINUS, $3); $$->location = @$; }
+	| expression "*" expression { $$ = new Arithmetic($1, Arithmetic::TIMES, $3); $$->location = @$; }
+	| expression "/" expression { $$ = new Arithmetic($1, Arithmetic::DIVIDE, $3); $$->location = @$; }
+	| "~" expression { $$ = new Arithmetic($2, Arithmetic::INVERSE, NULL); $$->location = @$; }
 	;
 
 comparison
-	: expression "<" expression { $$ = new Expression($1, "<", $3); $$->location = @$; }
-	| expression "<=" expression { $$ = new Expression($1, "<=", $3); $$->location = @$; }
-	| expression "=" expression { $$ = new Expression($1, "=", $3); $$->location = @$; }
-	| NOT expression { $$ = new Expression($2, "not", NULL); $$->location = @$; }
+	: expression "<" expression
+		{
+			$$ = new Comparison($1, Comparison::LESS_THAN, $3);
+			$$->location = @$;
+		}
+	| expression "<=" expression
+		{
+			$$ = new Comparison($1, Comparison::LESS_THAN_EQUALS, $3);
+			$$->location = @$;
+		}
+	| expression "=" expression
+		{
+			$$ = new Comparison($1, Comparison::EQUALS, $3);
+			$$->location = @$;
+		}
+	| NOT expression
+		{
+			$$ = new Comparison($2, Comparison::NOT, NULL);
+			$$->location = @$;
+		}
 	;
-*/
+
 %%
 
 void yy::CoolParser::error(const location_type& location, const std::string& msg){

@@ -18,6 +18,8 @@ public:
 	Method(const Method&);
 	Method& operator=(Method);
 	~Method();
+	
+	virtual void print(int = 0);
 };
 
 #endif

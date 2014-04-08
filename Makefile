@@ -13,17 +13,20 @@ BISON_FLAGS = -o $(PARSER_OUT) --defines=$(PARSER_H)
 FLEX_FLAGS = -o $(LEXER_OUT)
 
 SOURCES = Main.cpp CoolCompiler.cpp Semantic.cpp
-SOURCES += syntax/Type.cpp syntax/SymbolTable.cpp
-SOURCES += syntax/Class.cpp syntax/Attribute.cpp 
-SOURCES += syntax/Symbol.cpp syntax/Method.cpp syntax/Expression.cpp
-SOURCES += syntax/Assignment.cpp syntax/Conditional.cpp syntax/Loop.cpp
-SOURCES += syntax/Block.cpp
-HEADERS = CoolCompiler.h Semantic.h
-HEADERS += syntax/Type.h syntax/SymbolTable.h
-HEADERS += syntax/Class.h syntax/Attribute.h syntax/Symbol.h
-HEADERS += syntax/Method.h syntax/Expression.h
-HEADERS += syntax/Assignment.h syntax/Conditional.h syntax/Loop.h
-HEADERS += syntax/Block.h
+SOURCES += syntax/Type.cpp syntax/SymbolScope.cpp syntax/MethodScope.cpp
+SOURCES += syntax/Expression.cpp syntax/Class.cpp
+SOURCES += syntax/Attribute.cpp syntax/Symbol.cpp syntax/Method.cpp
+SOURCES += syntax/Arithmetic.cpp syntax/Assignment.cpp syntax/Block.cpp
+SOURCES += syntax/Case.cpp syntax/Comparison.cpp syntax/Conditional.cpp
+SOURCES += syntax/Let.cpp syntax/While.cpp
+
+HEADERS = CoolCompiler.h Semantic.h Headers.h
+HEADERS += syntax/Type.h syntax/SymbolScope.h syntax/MethodScope.h
+HEADERS += syntax/Expression.h syntax/Class.h
+HEADERS += syntax/Attribute.h syntax/Symbol.h syntax/Method.h
+HEADERS += syntax/Arithmetic.h syntax/Assignment.h syntax/Block.h
+HEADERS += syntax/Case.h syntax/Comparison.h syntax/Conditional.h
+HEADERS += syntax/Let.h syntax/While.h
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = coolc
 

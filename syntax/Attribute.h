@@ -10,12 +10,13 @@ public:
 	Symbol *symbol;
 	Expression *expression;
 	
-	Attribute();
 	Attribute(Symbol*);
 	Attribute(Symbol*, Expression*);
 	Attribute(const Attribute&);
 	Attribute& operator=(Attribute);
 	~Attribute();
+	
+	virtual void print(int = 0);
 };
 
 #endif

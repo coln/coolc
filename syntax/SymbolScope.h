@@ -1,29 +1,29 @@
-#ifndef COOL_SYMBOL_TABLE_H_
-#define COOL_SYMBOL_TABLE_H_
+#ifndef COOL_SYBMOL_TABLE_H_
+#define COOL_SYBMOL_TABLE_H_
 
-#include <algorithm>
 #include <string>
 #include <vector>
 #include "Symbol.h"
 
-class SymbolTable {	
+class SymbolScope {	
 private:
 	typedef std::vector<Symbol*> Scope;
 	typedef std::vector<Scope> ScopeList;
 	ScopeList table;
 	Scope *currentScope;
 	
+	SymbolScope(const SymbolScope&);
+	SymbolScope& operator=(const SymbolScope&);
+	
 public:
 	void enterScope();
 	void exitScope();
 	void add(Symbol*);
 	Symbol* find(const std::string&);
-	bool checkScope(const Symbol*&);
+	bool checkScope(const std::string&);
 	
-	SymbolTable();
-	SymbolTable(const SymbolTable&);
-	SymbolTable& operator=(SymbolTable);
-	~SymbolTable();
+	SymbolScope();
+	~SymbolScope();
 };
 
 #endif

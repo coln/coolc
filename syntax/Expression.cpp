@@ -1,27 +1,27 @@
 #include "Expression.h"
 
-Expression::Expression(){}
-/*Expression::Expression(Symbol *constant)
-	: constant(constant)
+Expression::Expression()
+	: type(EXPRESSION)
 {
 }
-Expression::Expression(Assignment *assignment)
-	: assignment(assignment)
+Expression::Expression(ExpType e)
+	: type(e)
 {
 }
-
-Expression::Expression(Expression *lhs, std::string op, Expression *rhs)
-	: symbol(NULL), lhs(lhs), op(op), rhs(rhs)
-{
-}
-*/
 Expression::Expression(const Expression& e)
-	: location(e.location)
+	: type(e.type), location(e.location)
 {
 }
 Expression& Expression::operator=(Expression e){
+	type = e.type;
 	location = e.location;
 	return *this;
 }
-
 Expression::~Expression(){}
+
+void Expression::print(int n){
+	int i = n;
+	while(i--){
+		std::cout << "  ";
+	}
+}

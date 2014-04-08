@@ -8,11 +8,14 @@ public:
 	Expression *ifBranch;
 	Expression *thenBranch;
 	Expression *elseBranch;
+	
 	Conditional(Expression*, Expression*);
 	Conditional(Expression*, Expression*, Expression*);
 	Conditional(const Conditional&);
 	Conditional& operator=(Conditional);
 	~Conditional();
+	
+	virtual void print(int = 0);
 };
 
 #endif

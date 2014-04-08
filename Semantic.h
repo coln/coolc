@@ -6,8 +6,9 @@ class CoolCompiler;
 #include <iostream>
 #include <sstream>
 #include "syntax/Type.h"
-#include "syntax/SymbolTable.h"
-#include "syntax/Class.h"
+#include "syntax/SymbolScope.h"
+#include "syntax/MethodScope.h"
+#include "Headers.h"
 #include "CoolCompiler.h"
 #include "parser.h"
 
@@ -15,9 +16,26 @@ class Semantic {
 private:	
 	Type objectType;
 	std::stringstream traceStream;
+	void parseTree();
+	Type* getType(Expression*);
 	bool populateTypes();
 	bool organizeTypes();
-	void trace();
+	bool typeCheck();
+	bool typeCheckExpression(Expression*);
+	bool typeCheckSymbol(Symbol*);
+	bool typeCheckAttribute(Attribute*);
+	bool typeCheckMethod(Method*);
+	bool typeCheckArithmetic(Arithmetic*);
+	bool typeCheckAssigment(Assignment*);
+	bool typeCheckBlock(Block*);
+	bool typeCheckCase(Case*);
+	bool typeCheckComparison(Comparison*);
+	bool typeCheckConditional(Conditional*);
+	bool typeCheckDispatch(Dispatch*);
+	bool typeCheckLet(Let*);
+	bool typeCheckNew();
+	bool typeCheckWhile(While*);
+	void trace(bool force = false);
 	
 public:
 	CoolCompiler &compiler;

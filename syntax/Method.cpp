@@ -1,13 +1,16 @@
 #include "Method.h"
 
-Method::Method(){}
+Method::Method()
+	: Expression(METHOD)
+{
+}
 
 Method::Method(Symbol *symbol, Expression *expression)
-	: symbol(symbol), expression(expression)
+	: Expression(METHOD), symbol(symbol), expression(expression)
 {
 }
 Method::Method(Symbol *symbol, std::vector<Symbol*> arguments, Expression *expression)
-	: symbol(symbol), arguments(arguments), expression(expression)
+	: Expression(METHOD), symbol(symbol), arguments(arguments), expression(expression)
 {
 }
 
@@ -21,7 +24,6 @@ Method& Method::operator=(Method m){
 	std::swap(this->expression, m.expression);
 	return *this;
 }
-
 Method::~Method(){
 	std::vector<Symbol*>::iterator it;
 	for(it = arguments.begin(); it != arguments.end(); ++it){
@@ -29,4 +31,12 @@ Method::~Method(){
 	}
 	delete symbol;
 	delete expression;
+}
+
+void Method::print(int n){
+	Expression::print(n);
+	std::cout << "method " << symbol->name << ":" << symbol->type << std::endl;
+	Expression::print(n + 1);
+	std::cout << "method body" << std::endl;
+	expression->print(n + 2);
 }

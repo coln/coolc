@@ -25,7 +25,12 @@ void Type::addChild(Type &type){
 	children.push_back(type);
 }
 
+
+// This ensures a <= (less than or equal) relationship
 Type* Type::findChild(const std::string &name){
+	if(this->name == name){
+		return this;
+	}
 	if(children.size() <= 0){
 		return NULL;
 	}
@@ -64,12 +69,15 @@ bool Type::isChild(const std::string &name){
 }
 
 void Type::print(int n){
-	int i;
-	std::cout << "  ";
-	for(i = 0; i < n; ++i){
+	if(name != "Int" && name != "Bool" && name != "String"){
+		int i;
 		std::cout << "  ";
+		for(i = 0; i < n; ++i){
+			std::cout << "  ";
+		}
+		std::cout << name << std::endl;
 	}
-	std::cout << name << std::endl;
+	
 	Type_iterator it;
 	for(it = children.begin(); it != children.end(); ++it){
 		it->print(n+1);

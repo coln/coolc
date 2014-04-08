@@ -14,9 +14,11 @@ public:
 	
 	Class(const std::string&);
 	Class(const std::string&, const std::string&);
+	Class(const Class&);
+	Class& operator=(Class);
 	~Class();
+	
+	virtual void print(int = 0);
 };
-
-
 
 #endif
