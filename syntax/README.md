@@ -3,7 +3,8 @@ Syntax Tree
 The files in this directory make up the syntax tree like so:
 
 - Type
-- Symbol Table
+- Symbol Scope
+- Method Scope
 - Expression
 	- Class
 	- Symbol
@@ -15,7 +16,11 @@ The files in this directory make up the syntax tree like so:
 	- Block
 
 Their addition is handled by parser.yy, and their deletion is handled by each
-destructor
+destructor.
+
+### Scopes
+There are two scopes, SymbolScope and MethodScope, because in Cool, a symbol
+and a method may have the same name
 
 ### Note on Symbols
 Symbols are created by declarations and assignments in Cool. I have given them 
