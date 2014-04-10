@@ -74,7 +74,9 @@ std::ostream& operator<<(std::ostream& os, const std::vector<Attribute*>& obj){
 %type <std::vector<Symbol*>> init_arg_list;
 %type <Expression*> expression;
 %type <Symbol*> constants identifiers;
-%type <Expression*> assignment conditional loop let;
+%type <Expression*> assignment conditional dispatch loop let;
+%type <Symbol*> dispatch_id;
+%type <std::vector<Expression*>> arg_list;
 %type <std::vector<Attribute*>> init_attribute_list;
 %type <Block*> block;
 
@@ -212,14 +214,14 @@ expression
 	| constants { $$ = $1; }
 	| identifiers { $$ = $1; }
 	| assignment { $$ = $1; }
-	/*| dispatch*/
+	| dispatch
 	| conditional { $$ = $1; }
 	| loop { $$ = $1; }
 	| "{" block "}" { $$ = $2; }
 	| let { $$ = $1; }
 	| cases { $$ = $1; }
-	/*| NEW TYPE { $$ = new Expression($2, $1); }
-	| ISVOID expression*/
+	| NEW TYPE { $$ = new New($2); $$->location = @$; }
+	| ISVOID expression { $$ = new IsVoid($2); $$->location = @$; }
 	| arithmetic { $$ = $1; }
 	| comparison { $$ = $1; }
 	;
@@ -264,22 +266,42 @@ assignment
 		}
 	;
 
-/*dispatch
+dispatch
 	: dispatch_id "(" arg_list ")"
+		{
+			$$ = new Dispatch($1, $3);
+			$$->location = @$;
+		}
 	| dispatch_id "(" ")"
+		{
+			$$ = new Dispatch($1);
+			$$->location = @$;
+		}
 	;
 
 dispatch_id
 	: expression "." IDENTIFIER
+		{
+			$$ = new Symbol($3, $1);
+			$$->location = @$;
+		}
 	| IDENTIFIER
+		{
+			$$ = new Symbol($1);
+			$$->location = @$;
+		}
 	| expression "@" TYPE "." IDENTIFIER
+		{
+			$$ = new Symbol($5, $3, $1);
+			$$->location = @$;
+		}
 	;
 
 arg_list
-	: expression
-	| arg_list "," expression
+	: expression { $$.push_back($1); }
+	| arg_list "," expression { $1.push_back($3); $$ = $1; }
 	;
-*/
+
 conditional
 	: IF expression THEN expression FI
 		{

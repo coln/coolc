@@ -32,8 +32,9 @@ private:
 	bool typeCheckComparison(Comparison*);
 	bool typeCheckConditional(Conditional*);
 	bool typeCheckDispatch(Dispatch*);
+	bool typeCheckIsVoid(IsVoid*);
 	bool typeCheckLet(Let*);
-	bool typeCheckNew();
+	bool typeCheckNew(New*);
 	bool typeCheckWhile(While*);
 	void trace(bool force = false);
 	

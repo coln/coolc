@@ -195,7 +195,8 @@ Type* Semantic::getType(Expression *expression){
 		// Join of the cases?
 		
 	}else if(expression->type == Expression::DISPATCH){
-		// ?
+		Dispatch *dispatch = dynamic_cast<Dispatch*>(expression);
+		type = getType(dispatch->expression);
 		
 	}else if(expression->type == Expression::ISVOID){
 		type = objectType.findChild("Bool");
@@ -205,8 +206,8 @@ Type* Semantic::getType(Expression *expression){
 		type = getType(let->expression);
 		
 	}else if(expression->type == Expression::NEW){
-		//NewExp *newExp = dynamic_cast<NewExp*>(expression);
-		//type = objectType.findChild(newExp->symbol->type);
+		New *newExp = dynamic_cast<New*>(expression);
+		type = objectType.findChild(newExp->type);
 		
 	}else if(expression->type == Expression::WHILE){
 		type = &objectType;
@@ -278,8 +279,8 @@ bool Semantic::typeCheckExpression(Expression *expression){
 		return typeCheckLet(let);
 		
 	}else if(expression->type == Expression::NEW){
-		//New *newExp = dynamic_cast<New*>(expression);
-		// return typeCheckNew(newExp);
+		New *newExp = dynamic_cast<New*>(expression);
+		return typeCheckNew(newExp);
 		
 	}else if(expression->type == Expression::WHILE){
 		While *whileExp = dynamic_cast<While*>(expression);
@@ -569,8 +570,38 @@ bool Semantic::typeCheckConditional(Conditional *conditional){
 	return true;
 }
 bool Semantic::typeCheckDispatch(Dispatch *dispatch){
-	// ?
+	std::string className = dispatch->symbol->type;
+	std::string functionName = dispatch->symbol->name;
+	Expression *expressionCall = dispatch->symbol->value;
+	
+	if(!typeCheckExpression(expressionCall)){
+		return false;
+	}
+	
+	// get type of expression call
+	// find that class in classes vector
+	// find method "functionName" in that class
+	// check num args against this call
+	
+	if(!className.empty()){
+		Method *method = compiler.methodScope.find(functionName);
+	}
+	
+	std::vector<Expression*>::iterator it;
+	for(it = dispatch->arguments.begin(); it != dispatch->arguments.end(); ++it){
+		// Check argument types/number against function declaration
+		if(!typeCheckExpression(*it)){
+			return false;
+		}
+	}
+	
 	return true;
+}
+bool Semantic::typeCheckIsVoid(IsVoid *isvoid){
+	if(!typeCheckExpression(isvoid->expression)){
+		return false;
+	}
+	return true;	
 }
 bool Semantic::typeCheckLet(Let *let){
 	compiler.symbolScope.enterScope();
@@ -589,8 +620,13 @@ bool Semantic::typeCheckLet(Let *let){
 	compiler.methodScope.exitScope();
 	return true;
 }
-bool Semantic::typeCheckNew(){
-	// ?
+bool Semantic::typeCheckNew(New *newExp){
+	Type *type = getType(newExp);
+	if(type == NULL){
+		compiler.errorStream << "no such type \"";
+		compiler.errorStream << newExp->type << "\"";
+		compiler.error(newExp->location);
+	}
 	return true;	
 }
 bool Semantic::typeCheckWhile(While *whileExp){

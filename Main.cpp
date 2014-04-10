@@ -26,37 +26,25 @@ int main(int argc, char* argv[]){
 }
 
 void printUsage(){
-	std::cout << "Usage: coolc [-vplto] file ...\n"
-			 "   Options\n"
-			 "       -v, --verbose\n"
-			 "           Show lexer and parser output and traces.\n"
-			 "           Analogous to -lp\n"
-			 "\n"
-			 "       -l, --lexer\n"
-			 "           Show lexer output and traces\n"
-			 "\n"
-			 "       -p, --parser\n"
-			 "           Show parser output and traces\n"
-			 "\n"
-			 "       -t, --parse-tree\n"
-			 "           Show complete parse tree output\n"
-			 "\n" 
-			 "       -s, --semantic\n"
-			 "           Show semantic analyzer output and traces\n"
-			 "\n"
-			 "       -y, --types\n"
-			 "           Show the type inheritance tree\n"
-			 "\n"
-			 "       -o, --output=FILE\n"
-			 "           Specify a file FILE to name the output executable\n"
-			 "           Default is a.out\n"
-			 "\n"
+	std::cout << "Usage: coolc [-hvplto] file ...\n"
+			"   Options\n"
+			"       -h, --help          Show this help info\n"
+			"       -v, --verbose       Show lexer and parser output and traces.\n"
+			"                           Analogous to -lp\n"
+			"       -l, --lexer         Show lexer output and traces\n"
+			"       -p, --parser        Show parser output and traces\n"
+			"       -t, --parse-tree    Show complete parse tree output\n"
+			"       -s, --semantic      Show semantic analyzer output and traces\n"
+			"       -y, --types         Show the type inheritance tree\n"
+			"       -o, --output=FILE   Specify a file FILE to name the output executable\n"
+			"                           Default is cool.s\n"
 			 ;
 }
 bool getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 	int flag;
 	while(true){
 		static struct option long_options[] = {
+			{"help", no_argument, 0, 'h'},
 			{"verbose", no_argument, 0, 'v'},
 			{"lexer", no_argument, 0, 'l'},
 			{"parser", no_argument, 0, 'p'},
@@ -67,8 +55,11 @@ bool getFlags(CoolCompiler& compiler, int argc, char* argv[]){
 		};
 		// getopt_long stores the option index here
 		int option_index = 0;
-		flag = getopt_long(argc, argv, "vlptsyo:", long_options, &option_index);
+		flag = getopt_long(argc, argv, "hvlptsyo:", long_options, &option_index);
 		switch(flag){
+			case 'h':
+				printUsage();
+				return false;
 			case 'v':
 				compiler.flags.verbose = true;
 				break;

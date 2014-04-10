@@ -18,7 +18,8 @@ SOURCES += syntax/Expression.cpp syntax/Class.cpp
 SOURCES += syntax/Attribute.cpp syntax/Symbol.cpp syntax/Method.cpp
 SOURCES += syntax/Arithmetic.cpp syntax/Assignment.cpp syntax/Block.cpp
 SOURCES += syntax/Case.cpp syntax/Comparison.cpp syntax/Conditional.cpp
-SOURCES += syntax/Let.cpp syntax/While.cpp
+SOURCES += syntax/Dispatch.cpp syntax/IsVoid.cpp
+SOURCES += syntax/Let.cpp syntax/New.cpp syntax/While.cpp
 
 HEADERS = CoolCompiler.h Semantic.h Headers.h
 HEADERS += syntax/Type.h syntax/SymbolScope.h syntax/MethodScope.h
@@ -26,7 +27,8 @@ HEADERS += syntax/Expression.h syntax/Class.h
 HEADERS += syntax/Attribute.h syntax/Symbol.h syntax/Method.h
 HEADERS += syntax/Arithmetic.h syntax/Assignment.h syntax/Block.h
 HEADERS += syntax/Case.h syntax/Comparison.h syntax/Conditional.h
-HEADERS += syntax/Let.h syntax/While.h
+SOURCES += syntax/Dispatch.h syntax/IsVoid.h
+HEADERS += syntax/Let.h syntax/New.h syntax/While.h
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = coolc
 

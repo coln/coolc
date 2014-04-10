@@ -18,7 +18,9 @@
 #include "syntax/Comparison.h"
 #include "syntax/Conditional.h"
 #include "syntax/Dispatch.h"
+#include "syntax/IsVoid.h"
 #include "syntax/Let.h"
+#include "syntax/New.h"
 #include "syntax/While.h"
 
 #endif
